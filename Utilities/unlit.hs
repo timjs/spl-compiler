@@ -6,26 +6,29 @@ import BasicPrelude
 startCommand = "\\startHASKELL"
 stopCommand = "\\stopHASKELL"
 
-unlit :: Text -> Text
-unlit = unlines . concat . scan . lines
+remove :: [Text] -> [Text]
+remove []                = []
+remove (line:rest)
+  | line == startCommand = empty : retain rest
+  | otherwise            = empty : remove rest
 
-scan :: [Text] -> [[Text]]
-scan lines = process rest
-    where (_,rest) = span (/= startCommand) lines
+retain :: [Text] -> [Text]
+retain []               = error "unlit: reached eof while retaining codeblock"
+retain (line:rest)
+  | line == stopCommand = empty : remove rest
+  | otherwise           = line  : retain rest
 
-process :: [Text] -> [[Text]]
-process [] = []
-process (_:rest) = extract (empty : rest)
-
-extract :: [Text] -> [[Text]]
-extract lines = save : scan rest
-    where (save,rest) = span (/= stopCommand) lines
+unlit :: Text -> Text -> Text
+unlit name text = unlines . check . remove . lines $ text
+  where check [] = error "unlit: no definitions found in file"
+        check l  = pragma : l
+        pragma   = "{-# LINE 1 \"" ++ name ++ "\" #-}"
 
 main = do
-    (_      :: String,
-     _      :: String,
+    (flag   :: Text,     -- Flag to indicate name for LINE pragma follows (-h in GHC)
+     name   :: Text,     -- Name to put in LINE pragma
      input  :: FilePath,
      output :: FilePath) <- readArgs
     text <- readFile input
-    writeFile output $ unlit text
+    writeFile output $ unlit name text
 
