@@ -7,7 +7,7 @@ Int facR (Int n) {
   if (n < 2)
     return 1;
   else
-    return n * facR(n − 1);
+    return n * facR(n - 1);
 }
 
 // The iterative version of the factorial function
@@ -15,8 +15,8 @@ Int facI (Int n) {
   Int r = 1;
 
   while (n > 1) {
-    r = r ∗ n;
-    n = n − 1;
+    r = r * n;
+    n = n - 1;
   }
 
   return r;
