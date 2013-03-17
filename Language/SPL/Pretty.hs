@@ -1,44 +1,53 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, OverlappingInstances #-}
 module Language.SPL.Pretty
   ( Pretty(..) ) where
 
 import Language.SPL.Program
 
-import Text.PrettyPrint.Leijen
+import Text.PrettyPrint.ANSI.Leijen
 
 tabstop = 4
 
 parensized :: (Pretty a) => [a] -> Doc
-parensized = parens . hcat . punctuate (comma <> space) . map pretty
+parensized = hang 1 . parens . hcat . punctuate (comma <> softline) . map pretty
+--parensized = tupled . map pretty
 
 block :: (Pretty a) => a -> Doc
 block b = braces $ line <> indent tabstop (pretty b) <> line
+
+keyword, constant, annotation, identifier, comment :: (Pretty a) => a -> Doc
+keyword    = yellow . pretty
+constant   = red    . pretty
+annotation = green  . pretty
+identifier = cyan   . pretty
+comment    = blue   . pretty
 
 instance Pretty Program where
   pretty = sep . map pretty
 
 instance Pretty Declaration where
   pretty (Declare t n e)    = pretty t <+> pretty n <+>
-                              equals <+> pretty e <> semi
-  pretty (Define t n p d b) = pretty t <+> pretty n <+> pretty p <+>
+                              align (equals <+> pretty e) <> semi
+  pretty (Define t n p d b) = empty <$>
+                              pretty t <+> pretty n <+> pretty p <+>
                               block (pretty d <$> pretty b)
 
 instance Pretty Type where
-  pretty VOID       = text "Void"
-  pretty INT        = text "Int"
-  pretty BOOL       = text "Bool"
+  pretty VOID       = annotation "Void"
+  pretty INT        = annotation "Int"
+  pretty BOOL       = annotation "Bool"
   pretty (PAIR s t) = parensized [s,t]
   pretty (LIST t)   = brackets (pretty t)
   pretty (Type s)   = text s
 
 instance Pretty Name where
-  pretty Print    = text "print"
-  pretty IsEmpty  = text "isEmpty"
-  pretty Head     = text "head"
-  pretty Tail     = text "tail"
-  pretty Fst      = text "fst"
-  pretty Snd      = text "snd"
-  pretty Main     = text "main"
+  pretty Print    = identifier "print"
+  pretty IsEmpty  = identifier "isEmpty"
+  pretty Head     = identifier "head"
+  pretty Tail     = identifier "tail"
+  pretty Fst      = identifier "fst"
+  pretty Snd      = identifier "snd"
+  pretty Main     = identifier "main"
   pretty (Name s) = text s
 
 instance Pretty Parameter where
@@ -56,20 +65,20 @@ instance Pretty Block where
 instance Pretty Statement where
   pretty (Assign n e)  = pretty n <+> equals <+> pretty e <> semi
   pretty (Execute n a) = pretty n <> pretty a <> semi
-  pretty (Return m)    = text "return" <+> pretty m <> semi
-  pretty (If c t e)    = text "if" <+> parens (pretty c) <+> 
-                         block t <+> text "else" <+> block e
-  pretty (While c l)   = text "while" <+> parens (pretty c) <+> block l
+  pretty (Return m)    = keyword "return" <+> pretty m <> semi
+  pretty (If c t e)    = keyword "if" <+> parens (pretty c) <+> 
+                         block t <+> keyword "else" <+> block e
+  pretty (While c l)   = keyword "while" <+> parens (pretty c) <+> block l
 
 instance Pretty Expression where
   pretty (Variable n)  = pretty n
-  pretty (Integer i)   = pretty i
-  pretty (Boolean b)   = pretty b
-  pretty (Nil)         = text "[]"
+  pretty (Integer i)   = constant i
+  pretty (Boolean b)   = constant b
+  pretty (Nil)         = constant "[]"
   pretty (Pair x y)    = parensized [x,y]
   pretty (Call n as)   = pretty n <> pretty as
-  pretty (Infix o l r) = parens (pretty l <+> pretty o <+> pretty r)
-  pretty (Prefix o e)  = parens (pretty o <> pretty e)
+  pretty (Infix o l r) = parens . align $ pretty l <+> pretty o </> pretty r
+  pretty (Prefix o e)  = parens $ pretty o <> pretty e
 
 instance Pretty BinaryOperator where
   pretty Add  = char '+'
