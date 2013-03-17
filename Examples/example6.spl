@@ -1,9 +1,12 @@
-Int sum ([Int] list)
-{
-	return head (list) + sum (tail (list));
-}
+/*
 
-Void main ()
+Void int ()
+{id = null;}
+
+if(x == < 6)
+{}
+*/
+Void intEGERE(int x , bool s)
 {
-	print (sum (1:3:5));
+	x = 0; s = true;
 }

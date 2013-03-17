@@ -9,7 +9,7 @@ import Language.SPL.Expression
 
 import Text.Parsec.String
 import Text.Parsec.Combinator hiding (optional)
-import Text.Parsec.Prim ((<?>), parse)
+import Text.Parsec.Prim ((<?>), try, parse)
 import Text.Parsec.Error (ParseError)
 
 parseSourceFile :: SourceName -> IO (Either ParseError Program)
@@ -29,9 +29,11 @@ declaration :: Parser Declaration
 declaration =   annotation >>= \an ->
                 identifier >>= \id ->
                 Declare an id <$> (equal *> expression <* semi)
-            <|> Define  an id <$> (parens parameters)
-                              <*> (brace *> many declaration)
-                              <*> (many statement <* brace)
+            <|> Define  an id <$> (parensized parameters)
+                              -- We need a try here, otherwise @declaration@
+                              -- eats our identifier as an annotation
+                              <*> (brace *> many (try declaration))
+                              <*> (many1 statement <* brace)
             <?> "variable or function declaration"
 
 annotation :: Parser Type
@@ -54,6 +56,9 @@ identifier =   Print   <$  reserved "print"
            <|> Name    <$> word
            <?> "identifier"
 
+parensized :: Parser [a] -> Parser [a]
+parensized p = lparen *> ([] <$ rparen <|> p <* rparen)
+
 parameters :: Parser Parameters
 parameters =   commaSep (Parameter <$> annotation <*> identifier)
            <?> "function parameters"
@@ -75,25 +80,25 @@ statement =   If      <$> (reserved "if" *> parens expression) <*> (block)
           <|> action
           <?> "statement"
 action    =   identifier >>= \id ->
-              Execute id <$> (parens arguments <* semi)
+              Execute id <$> (parensized arguments <* semi)
           <|> Assign  id <$> (equal *> expression <* semi)
           <?> "action"
 
-expression, term, parensized, call :: Parser Expression
+expression, term, group, call :: Parser Expression
 expression = expressionBuilder term
 term       =   Boolean True  <$ reserved "True"
            <|> Boolean False <$ reserved "False"
            <|> Integer    <$> decimal --TS: or integer???
            <|> Nil        <$  symbol "[]"
-           <|> parensized
+           <|> group
            <|> call
            <?> "term"
-parensized =   paren *> expression >>= \ex ->
+group      =   paren *> expression >>= \ex ->
                Pair ex <$> (comma *> expression <* paren)
            <|> paren *> pure ex
            <?> "parenthesized term"
 call       =   identifier >>= \id ->
-               Call id <$> parens arguments
+               Call id <$> parensized arguments
            <|> pure (Variable id)
            <?> "lookup term"
 

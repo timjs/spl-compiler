@@ -1,22 +1,37 @@
-Int i1 = 1;
-Bool b1 = True;
+Int int1 = -3;
+Bool bool1 = True;
+Bool bool2 = False;
+[Int] list = [];
 
-Void main (int x, int y, int b)
+Void mainfunction()
+{ Int x = 0;
+	someType st = null;
+        x = x +10;
+	if( x <10) function1(st,false);
+	else function1(st,true);
+}
+
+// Some bla bla bla
+Void function1 (someType st, Bool b)
 {
-    Bool b2 = False;
-	print ();
-	if (b1)
-    {
-        /* bla bla do stuff bla bla*/
-    }
+    if (bool1 && bool2 || bool2)
+        int1 = 3 - 2 + 1;
     else
+        int1 = 4 * 3 / 2 % 1;
+}
+
+/* Some more 
+bla bla 
+bla
+*/
+(Bool, Int) function2 ()
+{
+    while ( int1 > 0 || int1 < 1 && 
+            int1 <= 0 || int1 >= 1 && 
+            int1 != -6)
     {
-        /* bla bla do other stuff bla bla*/
+        list = int1:list;
     }
-	while(b2)
-    {
-	print();
-        // more bla bla
-    }
+    return (!bool2, someFunction());
 }
 

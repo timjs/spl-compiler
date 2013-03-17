@@ -1,0 +1,9 @@
+Int sum ([Int] list)
+{
+	return head (list) + sum (tail (list));
+}
+
+Void main ()
+{
+	print (sum (1:3:5));
+}

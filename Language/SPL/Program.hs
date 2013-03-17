@@ -53,18 +53,6 @@ data Expression = Variable Name
 -- Identifier <> Name
 -- Type <> Annotation
 
-{-
-instance Show Expression where
-  show (Variable n)  = show n
-  show (Integer i)   = show i
-  show (Boolean b)   = show b
-  show (Nil)         = "[]"
-  show (Pair x y)    = "(" ++ show x ++ "," ++ show y ++ ")"
-  show (Call n a)    = show n ++ "(" ++ show a ++ ")"
-  show (Infix o l r) = "(" ++ show l ++ " " ++ show o ++ " " ++ show r ++ ")"
-  show (Prefix o e)  = "(" ++ show o ++ show e ++ ")"
--}
-
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
                     | And | Or | Cons

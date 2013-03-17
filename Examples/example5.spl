@@ -1,12 +1,23 @@
-/*
-
-Void int ()
-{id = null;}
-
-if(x == < 6)
-{}
-*/
-Void intEGERE(int x , bool s)
+/**/
+//
+Void integer (int x, int bools)
 {
-	x = 0; s = true;
+			id = id;
+	boolean = null;
+
+
+}
+Bool z = true;
+Bool w = False;
+Void boolean ()
+{
+Bool b= true;
+b = fasle;
+}
+Bool z = true;
+Bool w = False;
+Void boolean ()
+{
+Bool b= true;
+b = fasle;
 }

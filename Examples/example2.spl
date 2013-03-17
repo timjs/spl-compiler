@@ -1,86 +1,22 @@
-/*
-Three ways to implement the factorial function in SPL.
-First the recursive version .
-*/
-Int facR ( Int n )
-{
+Int i1 = 1;
+Bool b1 = True;
 
-	x = 1 - - -100;
-{{{x = i;}}}
-    if ( n < 2 )
-        return 1;
-    else
-        return n * facR ( n - 1 ) ;
-}
-
-// The iterative version of the factorial function
-Int FacI ( Int n )
+Void main (int x, int y, int b)
 {
-    Int r = 1;
-    while ( n > 1 )
+    Bool b2 = False;
+	print ();
+	if (b1)
     {
-	{{	
-        r = r * n;
-        n = n - 1;
-	}}
+        /* bla bla do stuff bla bla*/
     }
-    return r ;
-}
-
-// A main function to check the results
-Void main ()
-{
-    Int n = 0;
-    Int facN = 1;
-    Bool ok = True;
-    while ( n < 20 )
-    {
-        facN = facR ( n ) ;
-        if ( facN != facI ( n ) || facN != facL ( n ))
-        {
-            print ( n : facN : facI ( n ) : facL ( n ) : [] ) ;
-            ok = False ;
-        }
-        n = n + 1;
-    }
-    print ( ok ) ;
-}
-// A list based factorial function
-// Defined here to show that functions can be given in any order (unlike C)
-Int facL ( Int n )
-{
-    return product (fromTo ( 1, n ) ) ;
-}
-
-// Computes the product of a list of integers
-Int product ( [Int] list )
-{
-    if ( isEmpty ( list ))
-        return 1;
     else
-        return head ( list ) * product ( tail ( list ) ) ;
-}
-
-// Generates a list of integers from the first to the last argument
-[Int] fromTo ( Int from, Int to)
-{
-    if ( from <= to )
-        return from : fromTo ( from + 1, to ) ;
-    else
-        return [] ;
-}
-
-// Reverse any list
-[t] reverse ( [t] list )
-{
-    [t] accu = [] ;
-    while ( ! isEmpty ( list ))
     {
-        accu = head ( list ) : accu ;
-        list = tail ( list ) ;
+        /* bla bla do other stuff bla bla*/
     }
-    return accu ;
+	while(b2)
+    {
+	print();
+        // more bla bla
+    }
 }
 
-// Absolute value, in an strange layout
-Int abs (Int n) { if (n < 0) return -n; else return n; }

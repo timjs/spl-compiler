@@ -1,23 +1,11 @@
-/**/
-//
-Void int (int x, int bools)
-{
-			id = id;
-	boolean = null;
+Int i1 = 1;
+Bool b1 = True;
 
+//Dit kan niet worden geparsed omdat het niet voldoet aan de grammer.
+Void main (int x, int y, int b)
+{
+  Bool b = true;
 
 }
-Bool z = true;
-Bool w = False;
-Void bool ()
-{
-Bool b= true;
-b = fasle;
-}
-Bool z = true;
-Bool w = False;
-Void bool ()
-{
-Bool b= true;
-b = fasle;
-}
+// Dit moet namelijk minimaal een statement bevatten. 
+
