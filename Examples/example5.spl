@@ -1,0 +1,12 @@
+/*
+
+Void int ()
+{id = null;}
+
+if(x == < 6)
+{}
+*/
+Void intEGERE(int x , bool s)
+{
+	x = 0; s = true;
+}

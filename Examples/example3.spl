@@ -1,0 +1,11 @@
+Int i1 = 1;
+Bool b1 = True;
+
+//Dit kan niet worden geparsed omdat het niet voldoet aan de grammer.
+Void main (int x, int y, int b)
+{
+  Bool b = true;
+
+}
+// Dit moet namelijk minimaal een statement bevatten. 
+

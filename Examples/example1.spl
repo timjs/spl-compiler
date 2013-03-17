@@ -1,0 +1,22 @@
+Int i1 = 1;
+Bool b1 = True;
+
+Void main (int x, int y, int b)
+{
+    Bool b2 = False;
+	print ();
+	if (b1)
+    {
+        /* bla bla do stuff bla bla*/
+    }
+    else
+    {
+        /* bla bla do other stuff bla bla*/
+    }
+	while(b2)
+    {
+	print();
+        // more bla bla
+    }
+}
+
