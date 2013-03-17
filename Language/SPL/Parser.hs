@@ -12,12 +12,11 @@ import Text.Parsec.Combinator hiding (optional)
 import Text.Parsec.Prim ((<?>), try, parse)
 import Text.Parsec.Error (ParseError)
 
-parseSourceFile :: SourceName -> IO (Either ParseError Program)
-parseSourceFile = parseFromFile source
---parseSourceFile fname = parse source fname =<< readFile fname
-
 parseSource :: SourceName -> String -> Either ParseError Program
 parseSource = parse source
+
+parseSourceFile :: SourceName -> IO (Either ParseError Program)
+parseSourceFile name = parseSource name <$> readFile name
 
 source :: Parser Program
 source = allOf program
