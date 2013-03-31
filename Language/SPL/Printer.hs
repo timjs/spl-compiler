@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, OverlappingInstances #-}
-module Language.SPL.Pretty
+module Language.SPL.Printer
   ( Pretty(..) ) where
 
 import Language.SPL.Program
