@@ -2,19 +2,19 @@ module Language.SPL.Program where
 
 import Language.SPL.Position
 
-type Program      = Declarations
-type Declarations = [Declaration]
+type Program    = Constructs
+type Constructs = [Construct]
 
-data Declaration = Declare Type Name Expression
-                 | Define  Type Name Parameters Declarations Block
-                 deriving (Show, Eq)
+data Construct = Declaration Type Name Expression
+               | Definition  Type Name Parameters Constructs Block
+               deriving (Show, Eq)
 
 data Type = VOID
           | INT
           | BOOL
           | PAIR Type Type
           | LIST Type
-          | Type String
+          | Poly String
           deriving (Show, Eq)
 data Name = Print
           | IsEmpty
@@ -26,17 +26,18 @@ data Name = Print
           | Name String
           deriving (Show, Eq)
 
-data Parameter = Parameter Type Name
-               deriving (Show, Eq)
-
 type Parameters = [Parameter]
-type Arguments  = [Expression]
+data Parameter  = Parameter Type Name
+                deriving (Show, Eq)
+
+type Arguments  = [Argument]
+type Argument   = Expression
+
 type Block      = [Statement]
-type Test       = Expression -- Of type BOOL
 
 data Statement  = Assign  Name Expression
-                | If      Test Block Block
-                | While   Test Block
+                | If      Expression Block Block
+                | While   Expression Block
                 | Return  (Maybe Expression)
                 | Execute Name Arguments
                 deriving (Show, Eq)

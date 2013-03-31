@@ -25,12 +25,12 @@ comment    = blue   . pretty
 instance Pretty Program where
   pretty = sep . map pretty
 
-instance Pretty Declaration where
-  pretty (Declare t n e)    = pretty t <+> pretty n <+>
-                              align (equals <+> pretty e) <> semi
-  pretty (Define t n p d b) = empty <$>
-                              pretty t <+> pretty n <+> pretty p <+>
-                              block (pretty d <$> pretty b)
+instance Pretty Construct where
+  pretty (Declaration t n e)    = pretty t <+> pretty n <+>
+                                  align (equals <+> pretty e) <> semi
+  pretty (Definition t n p d b) = empty <$>
+                                  pretty t <+> pretty n <+> pretty p <+>
+                                  block (pretty d <$> pretty b)
 
 instance Pretty Type where
   pretty VOID       = annotation "Void"
@@ -38,7 +38,7 @@ instance Pretty Type where
   pretty BOOL       = annotation "Bool"
   pretty (PAIR s t) = parensized [s,t]
   pretty (LIST t)   = brackets (pretty t)
-  pretty (Type s)   = text s
+  pretty (Poly s)   = text s
 
 instance Pretty Name where
   pretty Print    = identifier "print"
@@ -50,11 +50,11 @@ instance Pretty Name where
   pretty Main     = identifier "main"
   pretty (Name s) = text s
 
-instance Pretty Parameter where
-  pretty (Parameter t n) = pretty t <+> pretty n
-
 instance Pretty Parameters where
   pretty = parensized
+
+instance Pretty Parameter where
+  pretty (Parameter t n) = pretty t <+> pretty n
 
 instance Pretty Arguments where
   pretty = parensized

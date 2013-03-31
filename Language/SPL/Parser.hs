@@ -22,18 +22,18 @@ source :: Parser Program
 source = allOf program
 
 program :: Parser Program
-program = many1 declaration
+program = many1 construct
 
-declaration :: Parser Declaration
-declaration =   annotation >>= \an ->
-                identifier >>= \id ->
-                Declare an id <$> (equal *> expression <* semi)
-            <|> Define  an id <$> (parensized parameters)
-                              -- We need a try here, otherwise @declaration@
+construct :: Parser Construct
+construct =   annotation >>= \an ->
+              identifier >>= \id ->
+              Declaration an id <$> (equal *> expression <* semi)
+          <|> Definition  an id <$> (parensized parameters)
+                              -- We need a try here, otherwise @construct@
                               -- eats our identifier as an annotation
-                              <*> (brace *> many (try declaration))
+                              <*> (brace *> many (try construct))
                               <*> (many1 statement <* brace)
-            <?> "variable or function declaration"
+            <?> "variable or function construct"
 
 annotation :: Parser Type
 annotation =   VOID <$  reserved "Void"
@@ -41,7 +41,7 @@ annotation =   VOID <$  reserved "Void"
            <|> BOOL <$  reserved "Bool"
            <|> PAIR <$> (paren *> annotation) <*> (comma *> annotation <* paren)
            <|> LIST <$> brackets annotation
-           <|> Type <$> word
+           <|> Poly <$> word
            <?> "type annotation"
 
 identifier :: Parser Name
