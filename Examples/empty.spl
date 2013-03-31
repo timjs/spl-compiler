@@ -1,0 +1,5 @@
+// Een functiebody kan niet leeg zijn, dus dit kan niet geparseerd worden.
+Void main ()
+{
+}
+

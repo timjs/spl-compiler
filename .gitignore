@@ -4,3 +4,6 @@
 # Haskell generated
 *.hi
 *.o
+
+# TeX generated
+*.pdf

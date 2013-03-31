@@ -99,7 +99,7 @@ group      =   paren *> expression >>= \ex ->
 call       =   identifier >>= \id ->
                Call id <$> parensized arguments
            <|> pure (Variable id)
-           <?> "lookup term"
+           <?> "function call or variable"
 
 {-
   do paren
