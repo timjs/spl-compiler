@@ -98,7 +98,7 @@ group      =   paren *> expression >>= \ex ->
            <?> "parenthesized term"
 call       =   identifier >>= \id ->
                Call id <$> parensized arguments
-           <|> pure (Variable id)
+           <|> pure (Value id)
            <?> "function call or variable"
 
 {-

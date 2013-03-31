@@ -72,7 +72,7 @@ instance Pretty Statement where
   pretty (While c l)   = keyword "while" <+> parens (pretty c) <+> block l
 
 instance Pretty Expression where
-  pretty (Variable n)  = pretty n
+  pretty (Value n)     = pretty n
   pretty (Integer i)   = constant i
   pretty (Boolean b)   = constant b
   pretty (Nil)         = constant "[]"

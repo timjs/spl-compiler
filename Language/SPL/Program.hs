@@ -41,7 +41,7 @@ data Statement  = Assign  Name Expression
                 | Return  (Maybe Expression)
                 | Execute Name Arguments
                 deriving (Show, Eq)
-data Expression = Variable Name
+data Expression = Value    Name
                 | Integer  Integer
                 | Boolean  Bool
                 | Nil
