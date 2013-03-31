@@ -15,12 +15,13 @@ parensized = hang 1 . parens . hcat . punctuate (comma <> softline) . map pretty
 block :: (Pretty a) => a -> Doc
 block b = braces $ line <> indent tabstop (pretty b) <> line
 
-keyword, constant, annotation, identifier, comment :: (Pretty a) => a -> Doc
-keyword    = yellow . pretty
-constant   = red    . pretty
-annotation = green  . pretty
-identifier = cyan   . pretty
-comment    = blue   . pretty
+keyword, constant, annotation, identifier, comment, operator :: (Pretty a) => a -> Doc
+keyword    = yellow  . pretty
+constant   = red     . pretty
+annotation = green   . pretty
+identifier = cyan    . pretty
+comment    = blue    . pretty
+operator   = magenta . pretty
 
 instance Pretty Program where
   pretty = sep . map pretty
@@ -81,24 +82,24 @@ instance Pretty Expression where
   pretty (Prefix o e)  = parens $ pretty o <> pretty e
 
 instance Pretty BinaryOperator where
-  pretty Add  = char '+'
-  pretty Sub  = char '-'
-  pretty Mul  = char '*'
-  pretty Div  = char '/'
-  pretty Mod  = char '%'
-  pretty Eq   = text "=="
-  pretty Ne   = text "!="
-  pretty Lt   = char '<'
-  pretty Gt   = char '>'
-  pretty Le   = text "<="
-  pretty Ge   = text ">="
-  pretty And  = text "&&"
-  pretty Or   = text "||"
-  pretty Cons = char ':'
+  pretty Add  = operator '+'
+  pretty Sub  = operator '-'
+  pretty Mul  = operator '*'
+  pretty Div  = operator '/'
+  pretty Mod  = operator '%'
+  pretty Eq   = operator "=="
+  pretty Ne   = operator "!="
+  pretty Lt   = operator '<'
+  pretty Gt   = operator '>'
+  pretty Le   = operator "<="
+  pretty Ge   = operator ">="
+  pretty And  = operator "&&"
+  pretty Or   = operator "||"
+  pretty Cons = operator ':'
 
 instance Pretty UnaryOperator where
-  pretty Not = char '!'
-  pretty Neg = char '-'
+  pretty Not = operator '!'
+  pretty Neg = operator '-'
 
 
 
