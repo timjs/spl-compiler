@@ -15,7 +15,7 @@ data Type = VOID
           | PAIR Type Type
           | LIST Type
           | Poly String
-          deriving (Show, Eq)
+          deriving (Show, Eq, Ord)
 data Name = Print
           | IsEmpty
           | Head
@@ -24,7 +24,7 @@ data Name = Print
           | Snd
           | Main
           | Name String
-          deriving (Show, Eq)
+          deriving (Show, Eq, Ord)
 
 type Parameters = [Parameter]
 data Parameter  = Parameter Type Name
@@ -50,9 +50,6 @@ data Expression = Value    Name
                 | Infix    BinaryOperator Expression Expression
                 | Prefix   UnaryOperator Expression
                 deriving (Show, Eq)
-
--- Identifier <> Name
--- Type <> Annotation
 
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
