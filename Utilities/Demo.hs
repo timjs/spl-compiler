@@ -2,3 +2,7 @@ module Utilities.Demo where
 
 import Language.SPL.Parser
 import Language.SPL.Printer
+import Language.SPL.Analyzer
+
+import Control.Monad.Writer
+import Control.Monad.Reader
