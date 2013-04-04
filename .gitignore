@@ -5,5 +5,12 @@
 *.hi
 *.o
 
+# TeX helpers
+*.log
+*.tuc
+*.aux
+*.bbl
+*.blg
+
 # TeX generated
 *.pdf

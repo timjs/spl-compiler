@@ -1,0 +1,277 @@
+\startproduct analyser
+\environment  reportlayout
+
+\definetabulate[rule][|cM|]
+\definefloat[rule][rules]
+\setupfloat[rule]
+  [location=middle,
+   default=force,
+   indentnext=auto]
+\setupcaption[rule]
+  [location=right,
+   number=no,
+   style=\ss\bf]
+
+\define\booleans
+  {\math{\mathbb{B}}}
+
+\define[1]\definelabel
+  {\setvalue{#1}{\text{\ss #1}}}
+\definelabel{Int}
+\definelabel{Bool}
+\definelabel{Void}
+
+\define[2]\defineword
+  {\setvalue{#1}{\text{\tt #2}}}
+\define[2]\definekeyword
+  {\setvalue{#1}{\text{\tt\bf #2}}}
+\definekeyword{Return}{return}
+\definekeyword{If}{if}
+\definekeyword{While}{while}
+\defineword{Add}{+}
+\defineword{Sub}{-}
+\defineword{Mul}{*}
+\defineword{Div}{/}
+\defineword{Mod}{\%}
+\defineword{Eq}{==}
+\defineword{Ne}{!=}
+\defineword{Lt}{<}
+\defineword{Gt}{>}
+\defineword{Le}{<=}
+\defineword{Ge}{>=}
+\defineword{And}{&&}
+\defineword{Or}{||}
+\defineword{Cons}{:}
+\defineword{Not}{!}
+\defineword{Neg}{-}
+
+\def\startderivationformula#1\becomes#2\stopderivationformula
+  {\starttabulate[|cM|]
+   \NC #1 \NR
+   \HL
+   \NC #2 \NR
+   \stoptabulate}
+  
+%\starttexdefinition startderivationformula
+%  \start
+%    \define\becomes{\NR\HL\NC}
+%    \define\qquad{\qquad}
+%    \starttabulate[|cM|]
+%      \NC
+%\stoptexdefinition
+%\starttexdefinition stopderivationformula
+%      \NR
+%    \stoptabulate
+%  \stop
+%\stoptexdefinition
+
+\startstandardmakeup
+  \vfill
+  {\bfa Compiler Constructon}
+  \blank
+  {\ss\bfd Splahs – SPL, a Haskell implementation}
+  \blank
+  {\tfa Tim Steenvoorden (s0712663)}
+  \blank
+  {\tfa \date}
+  \vfill
+  \vfill
+  \startlines
+  Radboud University Nijmegen
+  Faculty of Science
+  Heyendaalseweg 135
+  6525 AJ Nijmegen
+  \stoplines
+\stopstandardmakeup
+
+%\section{Introduction}
+
+\section{Language}
+
+As an implementation language I chose Haskell, a pure functional programming language. Haskell is know for its rigid type system, its strong functional programming paradigm and its large community. There are also many great libraries which can be installed through the Cabal package manager. Most importantly, because of its large community there is a lot of documentation on the internet.
+
+Besides these language based arguments, there are some personal aspects I took into account. I wanted to push my functional programming skills to a higher level using functors, applicative functors, monads and monad transformers. It is a real challenge learning, understanding and using these constructs in a real world application!
+
+\section{Lexing and Parsing}
+
+%%% The grammar used to parse SPL, if it is different from the given grammar. If you used any supporting libraries explain what their role in your parser is.
+%%% => Grammar reflected by ast
+%%% => Parsec for all the work
+
+\section{Analysing}
+
+\subsection{Scope}
+
+Scoping is defined in three levels:
+
+\startitemize
+\head Global
+
+Contains functions and variables defined and declared at the top level of the file.
+
+\head Parameter
+
+Contains only variables declared as a parameter list when defining a function.
+
+\head Local
+
+Contains only variables declared at the start of the function body.
+\stopitemize
+
+Thus lookup and assignments of variables in function bodies will first look at the local declarations, then at the function parameters and at last at the global variable declarations.
+
+\subsection{Types}
+
+In this section we discuss several type check rules for SPL. Each rule uses an \emph{environment} $\Gamma : X \to \Sigma$, a map from variables $X$ to types $\Sigma$. The environment is constructed by following the scoping rules given above. Typing statements are given by $\Gamma \vdash x:\sigma$, which should be read as \emph{$x$ has type $\sigma$ is derived from $\Gamma$}. Basic types are \Bool, \Int, $[\sigma]$ (list of $\sigma$) and $(\sigma,\tau)$ (pair of $\sigma$ and $\tau$). The types of other language constructs are derived by the rules given in this section.
+
+We start with the rules for the four basic types:
+
+\placerule{boolean}
+  \startderivationformula
+  b \in \booleans
+  \becomes
+  \Gamma \vdash b:\Bool
+  \stopderivationformula
+
+\placerule{integer}
+  \startderivationformula
+  i \in \integers
+  \becomes
+  \Gamma \vdash i:\Int
+  \stopderivationformula
+
+\placerule{nil}
+  \startderivationformula
+  \becomes
+  \Gamma \vdash []:[\sigma]
+  \stopderivationformula
+
+\placerule{pair}
+  \startderivationformula
+  \Gamma \vdash e_1:\sigma \qquad \Gamma \vdash e_2:\tau
+  \becomes
+  \Gamma \vdash (e_1,e_2) : (\sigma,\tau)
+  \stopderivationformula
+
+Types of values are looked up in the environment $\Gamma$:
+
+\placerule{value}
+  \startderivationformula
+  x:\sigma \in \Gamma
+  \becomes
+  \Gamma \vdash x:\sigma
+  \stopderivationformula
+
+Infix operators of different types have their own derivation rules:
+
+\placerule{relational}
+  \startderivationformula
+  \Gamma \vdash e_1:\Int \qquad \Gamma \vdash e_2:\Int
+  \becomes
+  \Gamma \vdash (e_1 \sim e_2):\Bool
+  \stopderivationformula
+where $\sim\: \in \{\Eq,\Ne,\Lt,\Gt,\Le,\Ge\}$
+
+\placerule{numerical}
+  \startderivationformula
+  \Gamma \vdash e_1:\Int \qquad \Gamma \vdash e_2:\Int
+  \becomes
+  \Gamma \vdash (e_1 \odot e_2):\Int
+  \stopderivationformula
+where $\odot \in \{\Add,\Sub,\Mul,\Div,\Mod\}$
+
+\placerule{logical}
+  \startderivationformula
+  \Gamma \vdash e_1:\Bool \qquad \Gamma \vdash e_2:\Bool
+  \becomes
+  \Gamma \vdash (e_1 \bigtriangleup e_2):\Bool
+  \stopderivationformula
+where $\bigtriangleup \in \{\And, \Or\}$
+
+\placerule{cons}
+  \startderivationformula
+  \Gamma \vdash e_1:\sigma \qquad \Gamma \vdash e_2:\sigma
+  \becomes
+  \Gamma \vdash (e_1 \Cons e_2):\sigma
+  \stopderivationformula
+
+Prefix operators are defined in the same way:
+
+\placerule{not}
+  \startderivationformula
+  \Gamma \vdash e:\Bool
+  \becomes
+  \Gamma \vdash\, (\Not e):\Bool
+  \stopderivationformula
+
+\placerule{negate}
+  \startderivationformula
+  \Gamma \vdash e:\Int
+  \becomes
+  \Gamma \vdash (\Neg e):\Int
+  \stopderivationformula
+
+A function call is like a generalized operator:
+
+\placerule{call}
+  \startderivationformula
+  \Gamma \vdash f:\rho \qquad \Gamma \vdash e_i:\sigma_i \land p_i:\sigma_i \quad \forall i\in\underline{n}
+  \becomes
+  \Gamma \vdash f(e_1:\sigma_1, e_2:\sigma_2, \ldots, e_n:\sigma_n):\rho
+  \stopderivationformula
+
+Statements in SPL do not have types. We make an exception to certain statements, because we want to check the return type of a function matches the type of the expressions it returns. For functions which do not return a value, we use the extra type \Void.
+
+\placerule{void}
+  \startderivationformula
+  \becomes
+  \Gamma \vdash \Return:\Void
+  \stopderivationformula
+
+\placerule{return}
+  \startderivationformula
+  \Gamma \vdash e:\sigma
+  \becomes
+  \Gamma \vdash \Return\ e:\sigma
+  \stopderivationformula
+
+Blocks of \If\ and \While\ statements can also contain a \Return, so we have to check those expressions as well.
+
+\placerule{if}
+  \startderivationformula
+  \Gamma \vdash s_1:\sigma \qquad \Gamma \vdash s_2:\sigma
+  \becomes
+  \Gamma \vdash \If\ (e)\ \{s_1\}\ \{s_2\}:\sigma
+  \stopderivationformula
+
+\placerule{while}
+  \startderivationformula
+  \Gamma \vdash s:\sigma
+  \becomes
+  \Gamma \vdash \While\ (c)\ \{s\}:\sigma
+  \stopderivationformula
+
+Types are not assigned to other statements.
+
+\section{Examples}
+
+%%% A brief guide telling what each of the examples tests.
+
+\section{Time investment}
+
+\placetable
+  {Time investment in hours for each part of the compiler.}
+  \starttabulate[|l|l|]
+  \FL
+  \NC Part \NC Time investment \NR
+  \ML
+  \NC Lexer    \NC \NR
+  \NC Parser   \NC \NR
+  \NC Printer  \NC \NR
+  \NC Analyser \NC \NR
+  \LL
+  \stoptabulate
+
+\stopproduct
+
+% vim: ft=context spell spl=en cole=1
