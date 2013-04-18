@@ -41,7 +41,7 @@ annotation =   VOID <$  reserved "Void"
            <|> BOOL <$  reserved "Bool"
            <|> PAIR <$> (paren *> annotation) <*> (comma *> annotation <* paren)
            <|> LIST <$> brackets annotation
-           <|> Poly <$> word
+           <|> POLY <$> word
            <?> "type annotation"
 
 identifier :: Parser Name

@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, OverlappingInstances #-}
 module Language.SPL.Printer
-  ( Pretty(..) ) where
+  ( Pretty(..)
+  , module Text.PrettyPrint.ANSI.Leijen
+  ) where
 
 import Language.SPL.Program
 
@@ -39,7 +41,7 @@ instance Pretty Type where
   pretty BOOL       = annotation "Bool"
   pretty (PAIR s t) = parensized [s,t]
   pretty (LIST t)   = brackets (pretty t)
-  pretty (Poly s)   = text s
+  pretty (POLY s)   = annotation s
 
 instance Pretty Name where
   pretty Print    = identifier "print"
@@ -49,7 +51,7 @@ instance Pretty Name where
   pretty Fst      = identifier "fst"
   pretty Snd      = identifier "snd"
   pretty Main     = identifier "main"
-  pretty (Name s) = text s
+  pretty (Name s) = identifier s
 
 instance Pretty Parameters where
   pretty = parensized

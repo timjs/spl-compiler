@@ -1,6 +1,9 @@
 \startproduct analyser
 \environment  reportlayout
 
+\setupbodyfontenvironment[default]
+  [em=italic]
+
 \definetabulate[rule][|cM|]
 \definefloat[rule][rules]
 \setupfloat[rule]
@@ -14,36 +17,63 @@
 
 \define\booleans
   {\math{\mathbb{B}}}
+\define\SPL
+  {{\sc spl}}
 
 \define[1]\definelabel
-  {\setvalue{#1}{\text{\ss #1}}}
+  {\setvalue{#1}{\text{\ss\tf #1}}}
 \definelabel{Int}
 \definelabel{Bool}
 \definelabel{Void}
 
-\define[2]\defineword
-  {\setvalue{#1}{\text{\tt #2}}}
 \define[2]\definekeyword
   {\setvalue{#1}{\text{\tt\bf #2}}}
 \definekeyword{Return}{return}
 \definekeyword{If}{if}
+\definekeyword{Else}{else}
 \definekeyword{While}{while}
-\defineword{Add}{+}
-\defineword{Sub}{-}
-\defineword{Mul}{*}
-\defineword{Div}{/}
-\defineword{Mod}{\%}
-\defineword{Eq}{==}
-\defineword{Ne}{!=}
-\defineword{Lt}{<}
-\defineword{Gt}{>}
-\defineword{Le}{<=}
-\defineword{Ge}{>=}
-\defineword{And}{&&}
-\defineword{Or}{||}
-\defineword{Cons}{:}
-\defineword{Not}{!}
-\defineword{Neg}{-}
+\definekeyword{True}{True}
+\definekeyword{False}{False}
+\definekeyword{VOID}{Void}
+\definekeyword{INT}{Int}
+\definekeyword{BOOL}{Bool}
+\definekeyword{Print}{print}
+\definekeyword{IsEmpty}{isEmpty}
+\definekeyword{Head}{head}
+\definekeyword{Tail}{tail}
+\definekeyword{Fst}{fst}
+\definekeyword{Snd}{snd}
+\definekeyword{Main}{main}
+
+\define[2]\defineoperator
+  {\setvalue{#1}{\text{\tt\tf #2}}}
+\defineoperator{Add}{+}
+\defineoperator{Sub}{-}
+\defineoperator{Mul}{*}
+\defineoperator{Div}{/}
+\defineoperator{Mod}{\%}
+\defineoperator{Eq}{==}
+\defineoperator{Ne}{!=}
+\defineoperator{Lt}{<}
+\defineoperator{Gt}{>}
+\defineoperator{Le}{<=}
+\defineoperator{Ge}{>=}
+\defineoperator{And}{&&}
+\defineoperator{Or}{||}
+\defineoperator{Cons}{:}
+\defineoperator{Not}{!}
+\defineoperator{Neg}{-}
+
+\definetabulate[grammar][|lI|cM|lI|]
+\define\*{\math{^\star}}
+\define\+{\math{^+}}
+\define\?{\math{^?}}
+\define\|{\math{\mid}}
+\define\TQ{\NC \to \NC}
+\define\OQ{\NR\NC\NC \mid \NC}
+
+\makecharacteractive @ %@
+\def@#1@{{\tt\tf #1}}
 
 \def\startderivationformula#1\becomes#2\stopderivationformula
   {\starttabulate[|cM|]
@@ -51,11 +81,9 @@
    \HL
    \NC #2 \NR
    \stoptabulate}
-  
 %\starttexdefinition startderivationformula
 %  \start
 %    \define\becomes{\NR\HL\NC}
-%    \define\qquad{\qquad}
 %    \starttabulate[|cM|]
 %      \NC
 %\stoptexdefinition
@@ -64,12 +92,18 @@
 %    \stoptabulate
 %  \stop
 %\stoptexdefinition
+%\define\startderivationformula
+  %{\starttabulate[|cM|] \NC}
+%\define\stopderivationformula
+  %{\NR \stoptabulate}
+%\define\becomes
+  %{\NR\HL\NC}
 
 \startstandardmakeup
   \vfill
   {\bfa Compiler Constructon}
   \blank
-  {\ss\bfd Splahs – SPL, a Haskell implementation}
+  {\ss\bfd SPL, a Haskell implementation}
   \blank
   {\tfa Tim Steenvoorden (s0712663)}
   \blank
@@ -84,27 +118,118 @@
   \stoplines
 \stopstandardmakeup
 
-%\section{Introduction}
+\section{Introduction}
 
-\section{Language}
+This report describes the implementation of a compiler for the \emph{Simple Programming Language}. In \in{Section}[sec:language] we explain our choice for Haskell as an implementation language. Parsing and lexing is discussed \in{Section}[sec:parser], including our modifications to the grammar. The pretty printer is discused in \in{Section}[sec:printer]. In \in{Section}[sec:analyser] we discus semantic analysis by defining scoping and typing rules. Also, we include some examples characterizing these rules. We conclude in \in{Section}[sec:time] with an overview of the time investment.
+
+\section[sec:language]{Language}
 
 As an implementation language I chose Haskell, a pure functional programming language. Haskell is know for its rigid type system, its strong functional programming paradigm and its large community. There are also many great libraries which can be installed through the Cabal package manager. Most importantly, because of its large community there is a lot of documentation on the internet.
 
 Besides these language based arguments, there are some personal aspects I took into account. I wanted to push my functional programming skills to a higher level using functors, applicative functors, monads and monad transformers. It is a real challenge learning, understanding and using these constructs in a real world application!
 
-\section{Lexing and Parsing}
+\section[sec:parser]{Lexing and Parsing}
 
-%%% The grammar used to parse SPL, if it is different from the given grammar. If you used any supporting libraries explain what their role in your parser is.
+\subsection{Grammar}
+
+The grammar used to define \SPL\ is shown in \in{Table}[tab:grammar].
+Apart from some name changes, there are some other small differences from the original grammar. First, we make no distinction between return \emph{Type}s and other \emph{Type}s. Second, this grammar allows new \emph{Declaration}s as well as \emph{Definition}s inside a function definition. Third, we make a new rule for \emph{Block}s. These \emph{Block}s are multiple \emph{Statement}s between braces or just a single \emph{Statement}. We use these \emph{Block}s in \If\ and \While\ statements. As a consequence extra braces inside a block or function definition are \emph{not} allowed.
+
+\placetable[][tab:grammar]
+  {The grammar specifying this version of \SPL. Non-terminals are in {\it italics}, terminals in {\tt teletype}. \*, \+ and \? are used respectively to denote zero or more, one or more or possible occurrence of objects.}
+  \startgrammar
+  \NC Program     \TQ Construct\+ \NR
+  \NC Construct   \TQ Declaration
+                \OQ Definition \NR
+  \NC Declaration \TQ Type Name @=@ Expression @;@ \NR
+  \NC Definition  \TQ Type Name @(@ Parameters\? @)@
+    @\{@ Declaration\* Statement\+ @\}@ \NR
+  \NC Type        \TQ \VOID\ \| \INT\ \| \BOOL\
+                \OQ @(@ Type @,@ Type @)@
+                \OQ @[@ Type @]@
+                \OQ Name \NR
+  \NC Parameters  \TQ Type Name (@,@ Parameters)\? \NR
+  \NC Arguments   \TQ Expression (@,@ Arguments)\? \NR
+  \NC Block       \TQ @\{@ Statement\* @\}@
+                \OQ Statement \NR
+  \NC Statement   \TQ \If\ @(@ Expression @)@ Block (\Else\ Block)\?
+                \OQ \While\ @(@ Expression @)@ Block
+                \OQ \Return\ Expression\? @;@
+                \OQ Name @=@ Expression @;@
+                \OQ Call @;@ \NR
+  \NC Call        \TQ Name @(@ Arguments\? @)@ \NR
+  \NC Expression  \TQ \True\ \| \False\ \| Decimal \| @[]@ \| @(@ Expression @,@ Expression @)@
+                \OQ Name \| Call
+                \OQ Expression Binary Expression \| Unary Expression
+                \OQ @(@ Expression @)@ \NR
+  \NC Binary      \TQ \Add\ \| \Sub\ \| \Mul\ \| \Div\ \| \Mod\
+                \OQ \Eq\ \| \Ne\ \| \Lt\ \| \Gt\ \| \Le\ \| \Ge\
+                \OQ \And\ \| \Or\ \| \Cons\ \NR
+  \NC Unary       \TQ \Not\ \| \Neg\ \NR
+  \stopgrammar
+
+\subsection{Lexemes}
+
+Lexemes consist of braces, brackets and parentheses, punctuation symbols and the equality symbol. Besides that we have operators, keywords and built in names. All are listed in \in{Table}[tab:lexemes]
+
+Spaces, tabs, newlines et cetera are ignored. So are single line comments, starting with @//@ and multi line comments between @/*@ and @*/@. Multi line comments \emph{can} be nested.
+
+\placetable[][tab:lexemes]
+  {Lexemes used in the lexing phase of the compiler for \SPL.}
+  \starttabulate[|l|lT|]
+  \NC braces        \NC \{ \} \NR
+  \NC brackets      \NC [ ] \NR
+  \NC parentheses   \NC ( ) \NR
+  \NC interpunction \NC , ; \NR
+  \NC equal         \NC = \NR
+  \NC comments      \NC // /* */ \NR
+  \NC operators     \NC + - * / \% == != < > <= >= && || ! : \NR
+  \NC keywords      \NC if else while return True False Void Int Bool \NR
+  \NC builtins      \NC print isEmpty head tail fst snd main \NR
+  \stoptabulate
+
+Names of other variables and functions are lexed as shown in \in{Table}[tab:lexers]. We also give the definition of \emph{Decimal} numbers. The minus sign is \emph{not} lexed together with a \emph{Decimal} lexime but as a separate \emph{Unary} operator.
+
+\placetable[][tab:lexers]
+  {Lexemes used for \emph{Decimals} and \emph{Names}.}
+  \startgrammar
+  \NC Decimal \TQ Number\+ \NR
+  \NC Name    \TQ Letter (Letter \| Decimal \| @_@)\* \NR
+  \NC Letter  \TQ @a@ \| \ldots\ \| @z@ \| @A@ \| \ldots\ \| @Z@ \NR
+  \NC Number  \TQ @0@ \| \ldots\ \| @9@ \NR
+  \stopgrammar
+
+%%% The grammar used to parse \SPL, if it is different from the given grammar. If you used any supporting libraries explain what their role in your parser is.
 %%% => Grammar reflected by ast
 %%% => Parsec for all the work
 
-\section{Analysing}
+Source file: @Language/SPL/Lexer.hs@.
+
+\subsection{Implementation}
+
+The parser is written using Parsec, a Haskell parser combinator library originally developed by Daan Leijen \cite[leijen2001parsec]. All work is done chaining Parsec parsers in a Applicative or Monadic way. Parsec also enables us to use \emph{expression tables}: a way to express prefix and infix operators, denoting their fixity and precedence. Therefore we do not have to modify the grammar to express operator precedence.
+
+The abstract syntax tree is an almost one-to-one translation of the grammar found in \in{Table}[tab:grammar].
+
+Source files: @Language/SPL/Parser.hs@, @Language/SPL/Expression.hs@,\crlf @Language/SPL/Program.hs@.
+
+\section[sec:printer]{Pretty Printing}
+
+The pretty printer is implemented using the \emph{ansi-wl-pprint} \cite[leijen2001pprint] package from Cabal. This is a modified version of Philip Wadler's \emph{A prettier printer} \cite[wadler2003prettier] making use of colored terminal output. There is also a version available which makes use of the @Text@ data type. This could be used in the future for better performance.
+
+Source file: @Language/SPL/Printer.hs@.
+
+\section[sec:analyser]{Analysing}
 
 \subsection{Scope}
 
-Scoping is defined in three levels:
+Scoping is defined in four levels:
 
 \startitemize
+\head Built in
+
+Contains all predefined functions. These are \Print, \IsEmpty, \Head, \Tail, \Fst\ and \Snd.
+
 \head Global
 
 Contains functions and variables defined and declared at the top level of the file.
@@ -118,14 +243,18 @@ Contains only variables declared as a parameter list when defining a function.
 Contains only variables declared at the start of the function body.
 \stopitemize
 
-Thus lookup and assignments of variables in function bodies will first look at the local declarations, then at the function parameters and at last at the global variable declarations.
+All bindings are contained in an \emph{environment}: a map from names to variable and function information.
+To lookup names in function bodies will first look at the local declarations, then at the function parameters, then at the global declarations and at last at the built in definitions.
+
+Source file: @Language/SPL/Environment.hs@.
 
 \subsection{Types}
 
-In this section we discuss several type check rules for SPL. Each rule uses an \emph{environment} $\Gamma : X \to \Sigma$, a map from variables $X$ to types $\Sigma$. The environment is constructed by following the scoping rules given above. Typing statements are given by $\Gamma \vdash x:\sigma$, which should be read as \emph{$x$ has type $\sigma$ is derived from $\Gamma$}. Basic types are \Bool, \Int, $[\sigma]$ (list of $\sigma$) and $(\sigma,\tau)$ (pair of $\sigma$ and $\tau$). The types of other language constructs are derived by the rules given in this section.
+In this section we discuss several type check rules for \SPL. Each rule uses an \emph{environment} $\Gamma : X \to \Sigma$, a map from variables $X$ to types $\Sigma$. The environment is constructed by following the scoping rules given above. Typing statements are given by $\Gamma \vdash x:\sigma$, which should be read as \emph{$x$ has type $\sigma$ is derived from $\Gamma$}. Basic types are \Bool, \Int, $[\sigma]$ (list of $\sigma$) and $(\sigma,\tau)$ (pair of $\sigma$ and $\tau$). The types of other language constructs are derived by the rules given in this section.
 
 We start with the rules for the four basic types:
 
+\startsidebysidetext
 \placerule{boolean}
   \startderivationformula
   b \in \booleans
@@ -140,7 +269,9 @@ We start with the rules for the four basic types:
   \Gamma \vdash i:\Int
   \stopderivationformula
 
-\placerule{nil}
+\nextsidebysidetext
+
+\placerule{list}
   \startderivationformula
   \becomes
   \Gamma \vdash []:[\sigma]
@@ -152,6 +283,12 @@ We start with the rules for the four basic types:
   \becomes
   \Gamma \vdash (e_1,e_2) : (\sigma,\tau)
   \stopderivationformula
+\stopsidebysidetext
+
+Here $\integers$ is the set containing all the integers and $\booleans$ is the set defined as
+\startformula
+\booleans := \{\True,\False\}
+\stopformula
 
 Types of values are looked up in the environment $\Gamma$:
 
@@ -164,6 +301,7 @@ Types of values are looked up in the environment $\Gamma$:
 
 Infix operators of different types have their own derivation rules:
 
+\startsidebysidetext
 \placerule{relational}
   \startderivationformula
   \Gamma \vdash e_1:\Int \qquad \Gamma \vdash e_2:\Int
@@ -180,6 +318,8 @@ where $\sim\: \in \{\Eq,\Ne,\Lt,\Gt,\Le,\Ge\}$
   \stopderivationformula
 where $\odot \in \{\Add,\Sub,\Mul,\Div,\Mod\}$
 
+\nextsidebysidetext
+
 \placerule{logical}
   \startderivationformula
   \Gamma \vdash e_1:\Bool \qquad \Gamma \vdash e_2:\Bool
@@ -188,15 +328,17 @@ where $\odot \in \{\Add,\Sub,\Mul,\Div,\Mod\}$
   \stopderivationformula
 where $\bigtriangleup \in \{\And, \Or\}$
 
-\placerule{cons}
+\placerule{constructional}
   \startderivationformula
-  \Gamma \vdash e_1:\List \qquad \Gamma \vdash e_2:\List
+  \Gamma \vdash e_1:[\sigma] \qquad \Gamma \vdash e_2:[\sigma]
   \becomes
-  \Gamma \vdash (e_1 \Cons e_2):\List
+  \Gamma \vdash (e_1 \Cons e_2):[\sigma]
   \stopderivationformula
+\stopsidebysidetext
 
 Prefix operators are defined in the same way:
 
+\startsidebysidetext
 \placerule{not}
   \startderivationformula
   \Gamma \vdash e:\Bool
@@ -204,12 +346,15 @@ Prefix operators are defined in the same way:
   \Gamma \vdash\, (\Not e):\Bool
   \stopderivationformula
 
+\nextsidebysidetext
+
 \placerule{negate}
   \startderivationformula
   \Gamma \vdash e:\Int
   \becomes
   \Gamma \vdash (\Neg e):\Int
   \stopderivationformula
+\stopsidebysidetext
 
 A function call is like a generalized operator:
 
@@ -220,13 +365,16 @@ A function call is like a generalized operator:
   \Gamma \vdash f(e_1:\sigma_1, e_2:\sigma_2, \ldots, e_n:\sigma_n):\rho
   \stopderivationformula
 
-Statements in SPL do not have types. We make an exception to certain statements, because we want to check the return type of a function matches the type of the expressions it returns. For functions which do not return a value, we use the extra type \Void.
+Statements in \SPL\ do not have types. We make an exception to certain statements, because we want to check the return type of a function matches the type of the expressions it returns. For functions which do not return a value, we use the extra type \Void.
 
+\startsidebysidetext
 \placerule{void}
   \startderivationformula
   \becomes
   \Gamma \vdash \Return:\Void
   \stopderivationformula
+
+\nextsidebysidetext
 
 \placerule{return}
   \startderivationformula
@@ -234,9 +382,11 @@ Statements in SPL do not have types. We make an exception to certain statements,
   \becomes
   \Gamma \vdash \Return\ e:\sigma
   \stopderivationformula
+\stopsidebysidetext
 
-Blocks of \If\ and \While\ statements can also contain a \Return, so we have to check those expressions as well.
+Blocks of \If\ and \While\ statements can also contain a \Return, so we have to match the statements inside the containing blocks as well:
 
+\startsidebysidetext
 \placerule{if}
   \startderivationformula
   \Gamma \vdash s_1:\sigma \qquad \Gamma \vdash s_2:\sigma
@@ -244,33 +394,116 @@ Blocks of \If\ and \While\ statements can also contain a \Return, so we have to 
   \Gamma \vdash \If\ (e)\ \{s_1\}\ \{s_2\}:\sigma
   \stopderivationformula
 
+\nextsidebysidetext
+
 \placerule{while}
   \startderivationformula
   \Gamma \vdash s:\sigma
   \becomes
   \Gamma \vdash \While\ (c)\ \{s\}:\sigma
   \stopderivationformula
+\stopsidebysidetext
 
 Types are not assigned to other statements.
 
-\section{Examples}
+Built in functions have the following types:
 
-%%% A brief guide telling what each of the examples tests.
+\startsidebysidetext
+\placerule{print}
+  \startderivationformula
+  \Gamma \vdash e:\sigma
+  \becomes
+  \Gamma \vdash \Print(e):\Void
+  \stopderivationformula
 
-\section{Time investment}
+\placerule{head}
+  \startderivationformula
+  \Gamma \vdash e:[\sigma]
+  \becomes
+  \Gamma \vdash \Head(e):\sigma
+  \stopderivationformula
 
-\placetable
-  {Time investment in hours for each part of the compiler.}
+\placerule{fst}
+  \startderivationformula
+  \Gamma \vdash e:(\sigma,\tau)
+  \becomes
+  \Gamma \vdash \Fst(e):\sigma
+  \stopderivationformula
+
+\placerule{main}
+  \startderivationformula
+  \becomes
+  \Gamma \vdash \Main():\Void
+  \stopderivationformula
+
+\nextsidebysidetext
+
+\placerule{isempty}
+  \startderivationformula
+  \Gamma \vdash e:[\sigma]
+  \becomes
+  \Gamma \vdash \IsEmpty(e):\Bool
+  \stopderivationformula
+
+\placerule{tail}
+  \startderivationformula
+  \Gamma \vdash e:[\sigma]
+  \becomes
+  \Gamma \vdash \Tail(e):[\sigma]
+  \stopderivationformula
+
+\placerule{snd}
+  \startderivationformula
+  \Gamma \vdash e:(\sigma,\tau)
+  \becomes
+  \Gamma \vdash \Fst(e):\tau
+  \stopderivationformula
+\stopsidebysidetext
+
+\subsection{Examples}
+
+\subsubsubject{Pass}
+
+\typeSPLfile{Examples/1lists.spl}
+\typeSPLfile{Examples/2instance.spl}
+\typeSPLfile{Examples/4global.spl}
+\typeSPLfile{Examples/6order.spl}
+
+\subsubsubject{Fail}
+
+\typeSPLfile{Examples/3arrity.spl}
+\typeSPLfile{Examples/5return.spl}
+\typeSPLfile{Examples/7call.spl}
+\typeSPLfile{Examples/8duplicates.spl}
+\typeSPLfile{Examples/9undeclared.spl}
+\typeSPLfile{Examples/10unmatched.spl}
+
+\subsection{Implementation}
+
+The analyser is implemented by stacking the @Reader@ and @Writer@ monads on top of each other. @Reader@ is used to pass around the environment implicitly and @Writer@ to collect the errors produced during the analyser phase.
+
+Source files: @Language/SPL/Error.hs@, @Language/SPL/Analyser.hs@.
+
+\section[sec:time]{Time investment}
+
+Apart from time reading books and documentation, \in{Table}[tab:time] contains some information about the time investment in each part of the compiler till now.
+
+\placetable[][tab:time]
+  {Time investment in working days for each part of the compiler.}
   \starttabulate[|l|l|]
   \FL
   \NC Part \NC Time investment \NR
   \ML
-  \NC Lexer    \NC \NR
-  \NC Parser   \NC \NR
-  \NC Printer  \NC \NR
-  \NC Analyser \NC \NR
+  \NC Lexer    \NC 1 days \NR
+  \NC Parser   \NC 3 days \NR
+  \NC Printer  \NC $\frac12$ day \NR
+  \NC Analyser \NC 6 days \NR
   \LL
   \stoptabulate
+
+\subject{References}
+
+\placepublications[criterium=all]
 
 \stopproduct
 

@@ -1,0 +1,12 @@
+// Return value of num does not match type of variable
+Int num (Int n)
+{
+    return n;
+}
+
+Void main ()
+{
+    Bool b = True;
+    b = num(5);
+}
+

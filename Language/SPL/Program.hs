@@ -14,7 +14,7 @@ data Type = VOID
           | BOOL
           | PAIR Type Type
           | LIST Type
-          | Poly String
+          | POLY String
           deriving (Show, Eq, Ord)
 data Name = Print
           | IsEmpty
@@ -28,7 +28,7 @@ data Name = Print
 
 type Parameters = [Parameter]
 data Parameter  = Parameter Type Name
-                deriving (Show, Eq)
+                deriving (Show, Eq, Ord)
 
 type Arguments  = [Argument]
 type Argument   = Expression
@@ -40,7 +40,7 @@ data Statement  = Assign  Name Expression
                 | While   Expression Block
                 | Return  (Maybe Expression)
                 | Execute Name Arguments
-                deriving (Show, Eq)
+                deriving (Show, Eq, Ord)
 data Expression = Value    Name
                 | Integer  Integer
                 | Boolean  Bool
@@ -49,12 +49,14 @@ data Expression = Value    Name
                 | Call     Name Arguments
                 | Infix    BinaryOperator Expression Expression
                 | Prefix   UnaryOperator Expression
-                deriving (Show, Eq)
+                deriving (Show, Eq, Ord)
 
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
                     | And | Or | Cons
-                    deriving (Show, Eq)
+                    deriving (Show, Eq, Ord)
 data UnaryOperator  = Not | Neg
-                    deriving (Show, Eq)
+                    deriving (Show, Eq, Ord)
 
+type Arrity      = Int
+type Signature   = [Type]

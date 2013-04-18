@@ -1,0 +1,11 @@
+// Arbitrary order of declarations
+Int before = 1;
+
+Void main(){
+    Int sum = before + after;
+
+    print(sum);
+}
+
+Int after = 2;
+

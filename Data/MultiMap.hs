@@ -14,6 +14,9 @@ newtype MultiMap k a = MultiMap (Map k (Set a))
 empty :: MultiMap k a
 empty = MultiMap Map.empty
 
+toList :: (Ord k, Ord a) => MultiMap k a -> [(k,Set a)]
+toList (MultiMap m) = Map.toList m
+
 singleton :: (Ord k, Ord a) => k -> a -> MultiMap k a
 singleton k a = MultiMap $ Map.singleton k (Set.singleton a)
 

@@ -62,4 +62,4 @@ Int product ([Int] list) {
     return [];
 }
 
-// ft=c
+// vim: ft=c syn=spl

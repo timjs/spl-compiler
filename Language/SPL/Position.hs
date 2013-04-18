@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeSynonymInstances #-}
 module Language.SPL.Position 
   ( module Text.Parsec.Pos
   , Position
@@ -6,7 +7,12 @@ module Language.SPL.Position
 
 import Text.Parsec.Pos
 
+import Text.PrettyPrint.ANSI.Leijen (Pretty, pretty, text)
+
 type Position = SourcePos
 
 p = initialPos "filename.spl"
+
+instance Pretty Position where
+  pretty = text . show
 
