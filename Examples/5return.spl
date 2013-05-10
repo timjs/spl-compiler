@@ -1,9 +1,0 @@
-// Different return types
-Int bad ()
-{
-    if (2 < 4)
-      return True;
-    else
-      return 5;
-}
-

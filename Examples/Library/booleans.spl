@@ -1,0 +1,14 @@
+/*
+ * Boolean operations
+ */
+
+Bool xor(Bool a, Bool b) {
+   return (a || b) && !(a && b);
+}
+
+Bool implies(Bool a, Bool b) {
+   if (!a) return True;
+   else return b;
+}
+
+// vim: ft=c syn=spl

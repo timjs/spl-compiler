@@ -1,0 +1,7 @@
+// Global modification of variables
+Int   n = 0;
+Void main()
+{
+    n = n + 1;
+}
+// vim: ft=c syn=spl

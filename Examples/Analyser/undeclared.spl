@@ -1,0 +1,8 @@
+// Undeclared variable b
+Bool a = True;
+Void main ()
+{
+    Int n = a + b;
+    print(n);
+}
+// vim: ft=c syn=spl

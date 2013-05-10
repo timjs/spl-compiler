@@ -1,0 +1,17 @@
+// Test: should treat newlines as regular whitespace
+
+a
+f
+(
+)
+{
+a
+x
+=
+5
+;
+f
+(
+)
+;
+}

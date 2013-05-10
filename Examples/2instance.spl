@@ -1,6 +1,0 @@
-// Polymorphic instantiation
-// and a recursive function
-Int sum ([Int] list)
-{
-    return head(list) + sum(tail(list));
-}
