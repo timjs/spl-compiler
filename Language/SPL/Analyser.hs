@@ -90,7 +90,7 @@ instance Checkable Statement where
   check (Return _)     = return True
   check (Assign n e)   = checkAss n e =<< info n
     --info n >>= \i -> debug (Print.text "ass =>" <+> pretty n <> Print.text ": " <> pretty i) (checkAss n e i)
-  check (If c ts es)   = c =~ BOOL <&> check ts <&> check es
+  check (If c ts fs)   = c =~ BOOL <&> check ts <&> check fs
   check (While c ls)   = c =~ BOOL <&> check ls
   check (Execute n as) = checkFun n VOID (length as) as =<< info n
     --info n >>= \i -> debug (Print.text "exe =>" <+> pretty n <> Print.text ": " <> pretty i) (checkFun n VOID (length as) as i)

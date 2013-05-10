@@ -14,13 +14,13 @@ main = do
   e <- parseSourceFile (as!!0)
   case e of
     Right p -> do
-      putStrLn ":: Parsing succeded"
+      --putStrLn ":: Parsing succeded"
       print $ pretty p
       putStrLn ">> Analysing..."
       let (b,r) = (analyse p)
-      putStrLn $ if b then ":: Analysing succeded" else "!! Analysing failed"
+      --putStrLn $ if b then ":: Analysing succeded" else "!! Analysing failed"
       print $ pretty r
     Left r  -> do
-      putStrLn "!! Parsing failed"
+      --putStrLn "!! Parsing failed"
       print r
   putStrLn ":: Goodbye!"
