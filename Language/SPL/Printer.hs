@@ -4,7 +4,7 @@ module Language.SPL.Printer
   , module Text.PrettyPrint.ANSI.Leijen
   ) where
 
-import Language.SPL.Program
+import Language.SPL.Data.Program
 
 import Text.PrettyPrint.ANSI.Leijen
 

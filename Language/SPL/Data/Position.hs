@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeSynonymInstances #-}
-module Language.SPL.Position 
+module Language.SPL.Data.Position 
   ( module Text.Parsec.Pos
   , Position
   , p

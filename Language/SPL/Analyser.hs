@@ -1,10 +1,10 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}--, OverlappingInstances #-}
 module Language.SPL.Analyser where
 
-import Language.SPL.Program
-import Language.SPL.Position
-import Language.SPL.Environment
-import Language.SPL.Error
+import Language.SPL.Data.Program
+import Language.SPL.Data.Position
+import Language.SPL.Data.Environment
+import Language.SPL.Data.Error
 import Language.SPL.Printer (pretty, (<+>), (</>))
 import qualified Language.SPL.Printer as Print
 

@@ -1,9 +1,9 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
-module Language.SPL.Environment where
+module Language.SPL.Data.Environment where
 
-import Language.SPL.Program
-import Language.SPL.Error
-import Language.SPL.Position
+import Language.SPL.Data.Program
+import Language.SPL.Data.Error
+import Language.SPL.Data.Position
 
 import Language.SPL.Printer (Pretty, pretty)
 import qualified Language.SPL.Printer as Print

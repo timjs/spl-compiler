@@ -1,6 +1,6 @@
-module Language.SPL.Program where
+module Language.SPL.Data.Program where
 
-import Language.SPL.Position
+import Language.SPL.Data.Position
 
 type Program    = Constructs
 type Constructs = [Construct]

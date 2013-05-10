@@ -1,8 +1,8 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}
-module Language.SPL.Error where
+module Language.SPL.Data.Error where
 
-import Language.SPL.Position
-import Language.SPL.Program
+import Language.SPL.Data.Position
+import Language.SPL.Data.Program
 
 import Control.Monad.Writer
 

@@ -1,16 +1,17 @@
 module Language.SPL.Parser where
 
 import Control.Applicative
+import Data.Functor.Identity (Identity)
 
 import Language.SPL.Lexer
-import Language.SPL.Position
-import Language.SPL.Program
-import Language.SPL.Expression
+import Language.SPL.Data.Position
+import Language.SPL.Data.Program
 
 import Text.Parsec.String
 import Text.Parsec.Combinator hiding (optional)
 import Text.Parsec.Prim ((<?>), try, parse)
 import Text.Parsec.Error (ParseError)
+import qualified Text.Parsec.Expr as E
 
 parseSource :: String -> String -> Either ParseError Program
 parseSource = parse source
@@ -100,6 +101,33 @@ call       =   identifier >>= \id ->
                Call id <$> parensized arguments
            <|> pure (Value id)
            <?> "function call or variable"
+
+expressionBuilder p = E.buildExpressionParser table p
+                    <?> "expression"
+
+table = [ [prefix "!" Not, prefix "-" Neg]
+        , [infixL "*" Mul, infixL "/" Div, infixL "%" Mod]
+        , [infixL "+" Add, infixL "-" Sub]
+        , [infixR ":" Cons]
+        , [infixN "<=" Le, infixN ">=" Ge, infixN ">" Gt, infixN "<" Lt]
+        , [infixN "==" Eq, infixN "!=" Ne]
+        , [infixR "&&" And]
+        , [infixR "||" Or]
+        ]
+
+-- An Operator is a wrapped ParsecT:
+type Operator = E.Operator String () Identity
+
+binary :: E.Assoc -> String -> BinaryOperator -> Operator Expression
+binary a s o = E.Infix (Infix o <$ operator s) a
+
+unary :: String -> UnaryOperator -> Operator Expression
+unary s o = E.Prefix (Prefix o <$ operator s)
+
+infixL = binary E.AssocLeft
+infixR = binary E.AssocRight
+infixN = binary E.AssocNone
+prefix = unary
 
 {-
   do paren
