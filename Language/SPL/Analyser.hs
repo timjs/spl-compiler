@@ -23,10 +23,13 @@ infixl 5 =~, /~
 infix  0 <?>
 infixr 2 <&>
 
+-- Analyser Monad --------------------------------------------------------------
+
 -- An Analyser is an Reader of Info from Environment
 -- and a Writer of Error to Errors (aka a Reporter)
 type AnalyserT = ReaderT Environment
 type Analyser  = AnalyserT Reporter
+--type Analyser = ReaderT Environment Reporter
 
 --check :: Program -> Errors
 --check p = runReaderT (p =~ VOID) Map.empty
@@ -52,7 +55,7 @@ analyse p = runAnalyser (tell es >> check p) gs
               debug (Print.text "** Globals" </> pretty e) (check p)
               ) gs-}
 
-
+-- Checkable -------------------------------------------------------------------
 
 class Checkable a where
   check :: a -> Analyser Bool
@@ -95,7 +98,7 @@ instance Checkable Statement where
   check (Execute n as) = checkFun n VOID (length as) as =<< info n
     --info n >>= \i -> debug (Print.text "exe =>" <+> pretty n <> Print.text ": " <> pretty i) (checkFun n VOID (length as) as i)
 
-
+-- Matchable -------------------------------------------------------------------
 
 {- Checks if Type matches the type of the object and reports about possible errors.
  -}

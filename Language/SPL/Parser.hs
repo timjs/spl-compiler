@@ -34,7 +34,7 @@ construct =   annotation >>= \an ->
                               -- eats our identifier as an annotation
                               <*> (brace *> many (try construct))
                               <*> (many1 statement <* brace)
-            <?> "variable or function construct"
+          <?> "variable or function construct"
 
 annotation :: Parser Type
 annotation =   VOID <$  reserved "Void"
