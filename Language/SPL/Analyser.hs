@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}--, OverlappingInstances #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}
 module Language.SPL.Analyser where
 
 import Language.SPL.Data.Program
