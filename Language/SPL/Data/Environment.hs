@@ -23,13 +23,13 @@ type Environment = Map Name Info
 
 builtins :: Reporter Environment
 builtins = return $ Map.fromList types
-    where types = [ (Print, Function VOID 1 [POLY "a"])
+    where types = [ (Print,   Function VOID 1 [POLY "a"])
                   , (IsEmpty, Function BOOL 1 [LIST (POLY "a")])
-                  , (Head, Function (POLY "a") 1 [LIST (POLY "a")])
-                  , (Tail, Function (LIST (POLY "a")) 1 [LIST (POLY "a")])
-                  , (Fst, Function (PAIR (POLY "a") (POLY "b")) 1 [POLY "a"])
-                  , (Snd, Function (PAIR (POLY "a") (POLY "b")) 1 [POLY "b"])
-                  , (Main, Function VOID 0 [])
+                  , (Head,    Function (POLY "a") 1 [LIST (POLY "a")])
+                  , (Tail,    Function (LIST (POLY "a")) 1 [LIST (POLY "a")])
+                  , (Fst,     Function (PAIR (POLY "a") (POLY "b")) 1 [POLY "a"])
+                  , (Snd,     Function (PAIR (POLY "a") (POLY "b")) 1 [POLY "b"])
+                  , (Main,    Function VOID 0 [])
                   ]
 
 globals :: Program -> Reporter Environment

@@ -71,7 +71,7 @@ type Signature   = [Type]
 -- Pretty Printer --------------------------------------------------------------
 
 instance Pretty Program where
-  pretty = sep . map pretty
+  pretty = vsep . map pretty
 
 instance Pretty Construct where
   pretty (Declaration t n e)    = pretty t <+> pretty n <+>
