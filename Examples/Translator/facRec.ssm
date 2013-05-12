@@ -1,0 +1,23 @@
+	ldc 4	; argument
+	ldc fac	; compute
+	jsr
+	trap 0	; print result
+	halt
+fac:	lds -1	; copy arg to top
+	ldc 0	; value for compare
+	le	; arg < 0?
+	brt rtn1
+	lds -1	; arg<>0: copy arg to top
+	ldc 1
+	sub	; compute arg-1
+	ldc fac	;
+	jsr	; recursive call fac (arg-1)
+	lds -2	; copy arg to top
+	mul	; compute arg * fac (arg-1)
+	sts -2	; store result
+	ret
+rtn1:	ldc 1	; arg==0: result = 1
+	sts -2	; store result
+	ret
+
+; vim: syn=ia64
