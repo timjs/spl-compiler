@@ -22,13 +22,13 @@ data Type = VOID
           | LIST Type
           | POLY String
           deriving (Show, Eq, Ord)
-data Name = Print
+data Name = Main
+          | Print
           | IsEmpty
           | Head
           | Tail
           | Fst
           | Snd
-          | Main
           | Name String
           deriving (Show, Eq, Ord)
 
