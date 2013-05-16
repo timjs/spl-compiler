@@ -50,7 +50,7 @@ data Statement  = Assign  Name Expression
 data Expression = Value    Name
                 | Integer  Integer
                 | Boolean  Bool
-                | Nil
+                | List
                 | Pair     Expression Expression
                 | Call     Name Arguments
                 | Infix    BinaryOperator Expression Expression
@@ -67,6 +67,13 @@ data UnaryOperator  = Not | Neg
 type Arrity      = Int
 type Signature   = [Type]
 
+isDefinition :: Construct -> Bool
+isDefinition (Declaration _ _ _)    = False
+isDefinition (Definition _ _ _ _ _) = True
+
+isDeclaration :: Construct -> Bool
+isDeclaration (Declaration _ _ _)    = True
+isDeclaration (Definition _ _ _ _ _) = False
 
 -- Pretty Printer --------------------------------------------------------------
 
@@ -125,7 +132,7 @@ instance Pretty Expression where
   pretty (Value n)     = pretty n
   pretty (Integer i)   = constant i
   pretty (Boolean b)   = constant b
-  pretty (Nil)         = constant "[]"
+  pretty (List)        = constant "[]"
   pretty (Pair x y)    = parensized [x,y]
   pretty (Call n as)   = pretty n <> pretty as
   pretty (Infix o l r) = parens . align $ pretty l <+> pretty o </> pretty r

@@ -134,7 +134,7 @@ instance Matchable Statement where
 instance Matchable Expression where
   Boolean _      =~ BOOL     = return True
   Integer _      =~ INT      = return True
-  Nil            =~ LIST _   = return True
+  List           =~ LIST _   = return True
   Pair x y       =~ PAIR t s = x =~ t <&> y =~ s
   Value n        =~ t        = checkVar n t =<< info n
     --info n >>= \i -> debug (Print.text "var =>" <+> pretty n <> Print.text ": " <> pretty i) (checkVar n t i)

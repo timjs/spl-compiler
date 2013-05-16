@@ -89,7 +89,7 @@ expression = expressionBuilder term
 term       =   Boolean True  <$ reserved "True"
            <|> Boolean False <$ reserved "False"
            <|> Integer    <$> decimal --TS: or integer???
-           <|> Nil        <$  symbol "[]"
+           <|> List       <$  symbol "[]"
            <|> group
            <|> call
            <?> "term"
