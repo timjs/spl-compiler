@@ -6,21 +6,32 @@ import System.Environment
 import Language.SPL.Parser
 import Language.SPL.Printer
 import Language.SPL.Analyser
+import Language.SPL.Simplifier
+
+import Utilities.Output
 
 main = do
   as <- getArgs
   when (null as) (error "No arguments given")
-  putStrLn ">> Parsing..."
+  putAct "Parsing"
   e <- parseSourceFile (as!!0)
   case e of
     Right p -> do
-      --putStrLn ":: Parsing succeded"
+      putInf "Parsing succeded"
+      print $ p
       print $ pretty p
-      putStrLn ">> Analysing..."
+      putAct "Analysing"
       let (b,r) = (analyse p)
-      --putStrLn $ if b then ":: Analysing succeded" else "!! Analysing failed"
-      print $ pretty r
+      case b of
+        True  -> do
+          putInf "Analysing succeded"
+          putAct "Simplifying"
+          let p' = runSimplify p
+          print $ pretty p'
+        False -> do
+          putErr "Analysing failed"
+          print $ pretty r
     Left r  -> do
-      --putStrLn "!! Parsing failed"
+      putErr "Parsing failed"
       print r
-  putStrLn ":: Goodbye!"
+  putInf "Goodbye!"
