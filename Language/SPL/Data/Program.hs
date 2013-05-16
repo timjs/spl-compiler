@@ -60,9 +60,9 @@ data Expression = Value    Name
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
                     | And | Or | Cons
-                    deriving (Show, Eq, Ord)
+                    deriving (Show, Eq, Ord, Enum)
 data UnaryOperator  = Not | Neg
-                    deriving (Show, Eq, Ord)
+                    deriving (Show, Eq, Ord, Enum)
 
 type Arrity      = Int
 type Signature   = [Type]
