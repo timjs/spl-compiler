@@ -1,0 +1,18 @@
+Int g (Int a, Int b)
+{
+  return a + b;
+}
+
+Int h (Int a)
+{
+  return a * 2;
+}
+
+Void main ()
+{
+  Int r = 0;
+  r = g(h(1), h(2));
+  print(r);
+}
+
+// vim: ft=c syn=spl

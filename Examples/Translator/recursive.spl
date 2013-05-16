@@ -8,7 +8,8 @@ Int facR (Int n) {
 
 // A main function to check the results
 Void main () {
-  facR(4);
+  Int r = facR(4);
+  print(r);
 }
 
 // vim: ft=c syn=spl
