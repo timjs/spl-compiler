@@ -1,25 +1,110 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
 module Language.SPL.Simplifier where
 
 import Language.SPL.Data.Program
 
+--import Data.Sequence (Seq, (|>), (<|), (><))
+import Data.Foldable (foldrM)
+import Data.Functor
+
 import Control.Monad.Supply
+
+-- Sequences -------------------------------------------------------------------
+
+(<|) :: a -> [a] -> [a]
+(<|) = (:)
+
+(|>) :: [a] -> a -> [a]
+l |> x = l ++ [x] -- Yes, this is inefficient...
+
+(><) :: [a] -> [a] -> [a]
+(><) = (++)
 
 -- Supply Monad ----------------------------------------------------------------
 
-temporaries = map ('_' :) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
+type Temporary = Name
+type Supplier = Supply Temporary
 
-simplify :: Program -> Program
-simplify p = evalSupply (transform p) temporaries
+temporaries = map (\s -> Name $ '_':s) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
+
+runSimplify :: Program -> Program
+runSimplify p = evalSupply (simplify p) temporaries
 
 -- Simplifiable ----------------------------------------------------------------
 -- * Extract global Declarations.
 -- * Transform Declarations into ordinary Assign.
 -- * Replace Call expressions with Execute statements.
 
-class Transformable a where
-  transform :: a -> Supply String a
+type Statements = Block
+type Expressions = [Expression]
 
-instance Transformable Program where
-  transform = undefined
+class Simplifiable a b where
+  simplify :: a -> Supplier b
+
+instance Simplifiable Program Program where
+  simplify = mapM simplify
+
+instance Simplifiable Construct Construct where
+  simplify (Declaration t n e)       = return $ Declaration t n e --TODO
+  simplify (Definition t n ps cs bs) = simplify bs >>= \bs' ->
+                                       return $ Definition t n ps cs bs'
+
+instance Simplifiable Statement Statements where
+  simplify (Assign  n e)      = simplify e  >>= \(ss,e') ->
+                                return $ ss |> Assign n e' 
+  simplify (If      c ts fs)  = simplify c  >>= \(ss,c') ->
+                                simplify ts >>= \ts' ->
+                                simplify fs >>= \fs' ->
+                                return $ ss |> If c' ts' fs'
+  simplify (While   c ds)     = simplify c  >>= \(ss,c') ->
+                                simplify ds >>= \ds' ->
+                                return $ ss |> While c' ds'
+  simplify (Return  Nothing)  = return $ [Return Nothing]
+  simplify (Return  (Just e)) = simplify e  >>= \(ss,e') ->
+                                return $ ss |> Return (Just e')
+  simplify (Execute n as)     = simplify as >>= \(ss,as') ->
+                                return $ ss |> Execute n as'
+
+instance Simplifiable Expression (Statements, Expression) where
+  simplify (Pair    a b)   = simplify [a,b] >>= \(ss,[a',b']) ->
+                             return (ss, Pair a' b')
+  simplify (Call    n as)  = simplify as    >>= \(ss,as') ->
+                             supply         >>= \t ->
+                             return (ss |> Assign t (Call n as'), Value t)
+  simplify (Infix   o l r) = simplify [l,r] >>= \(ss,[l',r']) ->
+                             return (ss, Infix o l' r')
+  simplify (Prefix  o e)   = simplify e     >>= \(ss,e') ->
+                             return (ss, Prefix o e')
+  simplify e               = return ([], e) -- Value, Integer, Boolean, List
+
+instance Simplifiable Expressions (Statements, Expressions) where
+  simplify es = foldrM add ([],[]) =<< mapM simplify es
+
+instance Simplifiable Statements Statements where
+  simplify ss = return . concat =<< mapM simplify ss -- = concat <$> mapM simplify ss
+
+add :: (Statements,Expression) -> (Statements,Expressions) -> Supply Temporary (Statements,Expressions)
+(ss,e) `add` (ss',es')
+  | e <-> ss' = return (ss >< ss', e <| es')
+  | otherwise = supply >>= \t ->
+                return ((ss |> Assign t e) >< ss', Value t <| es')
+
+-- Commutable ------------------------------------------------------------------
+-- * Calls do not commute with any statement because of side-effects.
+-- * Container expressions commute with a statement if the contained
+--   expressions commute with the statement.
+-- * Values and literals trivially commute.
+
+class Commutable a where
+  (<->) :: Expression -> a -> Bool
+
+instance Commutable Statement where
+  Call _ _    <-> _ = False
+  Infix _ l r <-> s = l <-> s && r <-> s
+  Prefix _ e  <-> s = e <-> s
+  Pair x y    <-> s = x <-> s && y <-> s
+  _           <-> _ = True
+
+instance Commutable Statements where
+  e <-> ss = and $ map (e <->) ss
 
