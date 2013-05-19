@@ -7,6 +7,7 @@ import Language.SPL.Parser
 import Language.SPL.Printer
 import Language.SPL.Analyser
 import Language.SPL.Simplifier
+import Language.SPL.Translator
 
 import Utilities.Output
 
@@ -18,7 +19,6 @@ main = do
   case e of
     Right p -> do
       putInf "Parsing succeded"
-      print $ p
       print $ pretty p
       putAct "Analysing"
       let (b,r) = (analyse p)
@@ -26,8 +26,11 @@ main = do
         True  -> do
           putInf "Analysing succeded"
           putAct "Simplifying"
-          let p' = runSimplify p
+          let p' = transform p
           print $ pretty p'
+          putAct "Compiling"
+          let c = compile p'
+          print $ pretty c
         False -> do
           putErr "Analysing failed"
           print $ pretty r

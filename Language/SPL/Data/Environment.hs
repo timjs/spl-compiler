@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}
 module Language.SPL.Data.Environment where
 
 import Language.SPL.Data.Program
@@ -11,6 +11,7 @@ import qualified Language.SPL.Printer as Print
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Writer
+import Control.Monad.Reader
 
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -20,6 +21,9 @@ data Info = Function Type Arrity Signature
           deriving (Show, Eq, Ord)
 
 type Environment = Map Name Info
+
+info :: (MonadReader Environment m) => Name -> m (Maybe Info)
+info n = asks (Map.lookup n)
 
 builtins :: Reporter Environment
 builtins = return $ Map.fromList types

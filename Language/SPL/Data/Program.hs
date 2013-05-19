@@ -12,8 +12,8 @@ type Program    = Constructs
 type Constructs = [Construct]
 
 data Construct = Declaration Type Name Expression
-               | Definition  Type Name Parameters Constructs Block
-               deriving (Show, Eq)
+               | Definition  Type Name Parameters Constructs Statements
+               deriving (Show, Eq, Ord)
 
 data Type = VOID
           | INT
@@ -30,7 +30,7 @@ data Name = Main
           | Fst
           | Snd
           | Name String
-          deriving (Show, Eq, Ord)
+          deriving (Eq, Ord)
 
 type Parameters = [Parameter]
 data Parameter  = Parameter Type Name
@@ -39,23 +39,24 @@ data Parameter  = Parameter Type Name
 type Arguments  = [Argument]
 type Argument   = Expression
 
-type Block      = [Statement]
-
+type Statements = [Statement]
 data Statement  = Assign  Name Expression
-                | If      Expression Block Block
-                | While   Expression Block
+                | If      Expression Statements Statements
+                | While   Expression Statements
                 | Return  (Maybe Expression)
                 | Execute Name Arguments
                 deriving (Show, Eq, Ord)
-data Expression = Value    Name
-                | Integer  Integer
-                | Boolean  Bool
-                | List
-                | Pair     Expression Expression
-                | Call     Name Arguments
-                | Infix    BinaryOperator Expression Expression
-                | Prefix   UnaryOperator Expression
-                deriving (Show, Eq, Ord)
+
+type Expressions = [Expression]
+data Expression  = Value    Name
+                 | Integer  Integer
+                 | Boolean  Bool
+                 | List
+                 | Pair     Expression Expression
+                 | Call     Name Arguments
+                 | Infix    BinaryOperator Expression Expression
+                 | Prefix   UnaryOperator Expression
+                 deriving (Show, Eq, Ord)
 
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
@@ -68,12 +69,28 @@ type Arrity      = Int
 type Signature   = [Type]
 
 isDefinition :: Construct -> Bool
-isDefinition (Declaration _ _ _)    = False
 isDefinition (Definition _ _ _ _ _) = True
+isDefinition _                      = False
 
 isDeclaration :: Construct -> Bool
-isDeclaration (Declaration _ _ _)    = True
-isDeclaration (Definition _ _ _ _ _) = False
+isDeclaration (Declaration _ _ _) = True
+isDeclaration _                   = False
+
+isMain :: Construct -> Bool
+isMain (Definition _ Main _ _ _) = True
+isMain _                         = False
+
+-- Manual Show -----------------------------------------------------------------
+
+instance Show Name where
+  show Main     = "main"
+  show Print    = "print"
+  show IsEmpty  = "isEmpty"
+  show Head     = "head"
+  show Tail     = "tail"
+  show Fst      = "fst"
+  show Snd      = "snd"
+  show (Name s) = s
 
 -- Pretty Printer --------------------------------------------------------------
 
@@ -114,7 +131,7 @@ instance Pretty Parameter where
 instance Pretty Arguments where
   pretty = parensized
 
-instance Pretty Block where
+instance Pretty Statements where
   pretty = vsep . map pretty
 
 instance Pretty Statement where

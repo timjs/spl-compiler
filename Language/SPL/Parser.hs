@@ -67,7 +67,7 @@ arguments  :: Parser Arguments
 arguments  =   commaSep (expression)
            <?> "function arguments"
 
-block :: Parser Block
+block :: Parser Statements
 block     =   braces (many statement)
           <|> count 1 statement
           <?> "block"

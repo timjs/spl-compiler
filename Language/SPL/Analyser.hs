@@ -27,9 +27,7 @@ infixr 2 <&>
 
 -- An Analyser is an Reader of Info from Environment
 -- and a Writer of Error to Errors (aka a Reporter)
-type AnalyserT = ReaderT Environment
-type Analyser  = AnalyserT Reporter
---type Analyser = ReaderT Environment Reporter
+type Analyser  = ReaderT Environment Reporter
 
 --check :: Program -> Errors
 --check p = runReaderT (p =~ VOID) Map.empty
@@ -42,9 +40,6 @@ c <?> t = c >>= \c' -> if c' then return True else t
 
 (<&>) :: Analyser Bool -> Analyser Bool -> Analyser Bool
 (<&>) = liftM2 (&&)
-
-info :: (MonadReader Environment m) => Name -> m (Maybe Info)
-info n = asks (Map.lookup n)
 
 analyse :: Program -> (Bool,Errors)
 analyse p = runAnalyser (tell es >> check p) gs

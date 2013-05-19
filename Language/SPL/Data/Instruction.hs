@@ -1,24 +1,42 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ViewPatterns #-}
 module Language.SPL.Data.Instruction where
+
+import Language.SPL.Printer (Pretty,pretty,text,char,vsep,(<>),(<+>))
+
+import Prelude hiding (null)
+
+import qualified Data.Sequence as Seq
+import Data.Sequence (Seq,singleton,null,(<|),(><),(|>))
+import Data.Foldable (toList)
+
+adjust' :: (a -> a) -> Int -> Seq a -> Seq a
+adjust' f i s
+  | i < 0     = Seq.adjust f (Seq.length s + i) s
+  | otherwise = Seq.adjust f i s
 
 type Comment  = String
 type Label    = String
-type Size     = Int
-type Offset   = Int
-data Register = PC | SP | MP | RR | GD | R5 | R6 | R7
+type Size     = Integer
+type Offset   = Integer
+data Register = PC | SP | MP | RV | GP | NL | R6 | R7
               deriving (Show, Eq, Ord, Enum)
 
-data Operation = ADD | SUB | MUL | DIV | MOD | NEG
+data Instruction = Label :# Instruction
+               | Instruction :## Comment
+
+               | ADD | SUB | MUL | DIV | MOD | NEG
                | AND | OR  | XOR | NOT
                | EQ | NE | GT | LT | GE | LE
-               | LDS Offset | LDL Offset | LDA Offset | LDR Register | LDH Offset | LDC Int
+
+               | LDC Integer | LDC' Label
+               | LDS Offset | LDL Offset | LDA Offset | LDR Register | LDH Offset
                | STS Offset | STL Offset | STA Offset | STR Register | STH
-               | LDMS Size Offset | LDML Size Offset | LDMA Size Offset | LDMH Size Offset
+               | LDMS Size Offset | LDML Size Offset | LDMA Size Offset | LDMH Offset Size
                | STMS Size Offset | STML Size Offset | STMA Size Offset | STMH Size
                | BRA Label | BRT Label | BRF Label
                | AJS Offset
                | NOP
-               | HALT | TRAP Int
+               | HALT | TRAP Integer
 
                | JSR | BSR | RET
                | ANNOTE
@@ -28,25 +46,29 @@ data Operation = ADD | SUB | MUL | DIV | MOD | NEG
                | SWP | SWPR | SWPRR
                deriving (Show, Eq)
 
-type Instruction  = (Maybe Label, Operation, Maybe Comment)
-type Instructions = [Instruction]
+type Instructions = Seq Instruction
 
-op :: Operation -> Instruction
-op o = (Nothing, o, Nothing)
+(#) :: Label -> Instructions -> Instructions
+l # os
+  | null os   = singleton (l :# NOP)
+  | otherwise = adjust' (l :#) 0 os
+--l # (toList -> [])   = singleton (l :# NOP)
+--l # (toList -> o:os) = l :# o <| os
 
-class Annotatable a where
-  (<:>) :: Label -> a -> Instruction
-  (<#>) :: a -> Comment -> Instruction
+(##) :: Instructions -> Comment -> Instructions
+os ## c
+  | null os   = singleton (NOP :## c)
+  | otherwise = adjust' (:## c) (-1) os
 
-instance Annotatable Operation where
-  l <:> o = (Just l, o, Nothing)
+instance Pretty Instruction where
+  pretty (l :#  i) = text l <> char ':' <> pretty i
+  pretty (i :## c) = pretty i <> char ';' <+> text c
+  pretty (BRA l)   = text "\t\t" <> text "BRA" <+> text l <> text "\t\t"
+  pretty (BRT l)   = text "\t\t" <> text "BRT" <+> text l <> text "\t\t"
+  pretty (BRF l)   = text "\t\t" <> text "BRF" <+> text l <> text "\t\t"
+  pretty (LDC' l)  = text "\t\t" <> text "LDC" <+> text l <> text "\t\t"
+  pretty i         = text "\t\t" <> text (show i) <> text "\t\t"
 
-  o <#> c = (Nothing, o, Just c)
-
-instance Annotatable Instruction where
-  l' <:> (Nothing, o, c) = (Just l', o, c)
-  l' <:> (Just l,  o, c) = (Just $ l ++ ", " ++ l', o, c)
-
-  (l, o, Nothing) <#> c' = (l, o, Just c')
-  (l, o, Just c)  <#> c' = (l, o, Just $ c ++ ", " ++ c')
+instance Pretty Instructions where
+  pretty = vsep . map pretty . toList
 

@@ -1,11 +1,14 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
 module Language.SPL.Simplifier where
 
+import Language.SPL.Printer (Pretty, pretty)
+import qualified Language.SPL.Printer as Print
+
 import Language.SPL.Data.Program
 
 --import Data.Sequence (Seq, (|>), (<|), (><))
+import Data.List
 import Data.Foldable (foldrM)
-import Data.Functor
 
 import Control.Monad.Supply
 
@@ -27,27 +30,38 @@ type Supplier = Supply Temporary
 
 temporaries = map (\s -> Name $ '_':s) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
 
-runSimplify :: Program -> Program
-runSimplify p = evalSupply (simplify p) temporaries
+transform :: Program -> Program
+transform p = evalSupply (transform' p) temporaries
+
+transform' :: Program -> Supplier Program
+transform' p = do gs' <- simplify gs
+                  fs' <- mapM simplify fs
+                  return . sort . map (updateMain gs') $ fs'
+               where (gs,fs) = partition isDeclaration p
+
+updateMain :: Statements -> Construct -> Construct
+updateMain gs (Definition VOID Main [] [] ss) = Definition VOID Main [] [] (gs ++ ss)
+updateMain _  c                               = c
 
 -- Simplifiable ----------------------------------------------------------------
--- * Extract global Declarations.
 -- * Transform Declarations into ordinary Assign.
--- * Replace Call expressions with Execute statements.
-
-type Statements = Block
-type Expressions = [Expression]
+-- * Extract global Declarations and the initialization to the Main function.
+-- * Make sure Call expressions are only allowed in an (temporary) Assign.
 
 class Simplifiable a b where
   simplify :: a -> Supplier b
 
-instance Simplifiable Program Program where
-  simplify = mapM simplify
+instance (Simplifiable a Statements) => Simplifiable [a] Statements where
+  simplify as = return . concat =<< mapM simplify as
 
 instance Simplifiable Construct Construct where
-  simplify (Declaration t n e)       = return $ Declaration t n e --TODO
   simplify (Definition t n ps cs bs) = simplify bs >>= \bs' ->
-                                       return $ Definition t n ps cs bs'
+                                       simplify cs >>= \cs' ->
+                                       return $ Definition t n ps [] (cs' ++ bs')
+
+instance Simplifiable Construct Statements where
+  simplify (Declaration t n e)       = simplify e >>= \(ss,e') ->
+                                       return $ ss |> Assign n e'
 
 instance Simplifiable Statement Statements where
   simplify (Assign  n e)      = simplify e  >>= \(ss,e') ->
@@ -79,9 +93,6 @@ instance Simplifiable Expression (Statements, Expression) where
 
 instance Simplifiable Expressions (Statements, Expressions) where
   simplify es = foldrM add ([],[]) =<< mapM simplify es
-
-instance Simplifiable Statements Statements where
-  simplify ss = return . concat =<< mapM simplify ss -- = concat <$> mapM simplify ss
 
 add :: (Statements,Expression) -> (Statements,Expressions) -> Supply Temporary (Statements,Expressions)
 (ss,e) `add` (ss',es')
