@@ -8,9 +8,14 @@
 # TeX helpers
 *.log
 *.tuc
+*.toc
 *.aux
 *.bbl
 *.blg
+*.nav
+*.out
+*.snm
+*.vrb
 *.vimout
 
 # TeX generated

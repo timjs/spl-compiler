@@ -12,8 +12,7 @@ Int facI (Int n) {
 
 // A main function to check the results
 Void main () {
-  Int r = facI(4);
-  print(r);
+  print(facI(4));
 }
 
 // vim: ft=c syn=spl

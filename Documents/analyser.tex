@@ -1,6 +1,6 @@
 \input beamerlayout
 
-\lstnewenvironment{code}
+\lstnewenvironment{HASKELL}
   {\lstset{language=haskell,
            keywords={Reader,ReaderT,Writer,WriterT,do,data,type,ask,tell},
            otherkeywords={=,::,->,<-,\$,=~,<\&>}}} 
@@ -53,18 +53,18 @@
 
   Map names (variables, functions) to types:
 
-    \begin{code}
+    \begin{HASKELL}
       type Environment = Map Name Type
-    \end{code}
+    \end{HASKELL}
     
   \pause
   
   \begin{block}{}
-    \begin{code}
+    \begin{HASKELL}
       check :: Environment -> Statement -> Bool !\pause!
       check env (Assign n e) = match env e (lookup n env)
       ...
-    \end{code}
+    \end{HASKELL}
   \end{block}
   
   \pause
@@ -78,24 +78,24 @@
 \begin{frame}[fragile]{Reading Environments}
   
   \begin{block}{}
-    \begin{code}
+    \begin{HASKELL}
       check :: Environment -> Statement -> Bool
       check env (Assign n e) = match env e (lookup n env)
       ...
-    \end{code}
+    \end{HASKELL}
   \end{block}
   
   Meet the Reader monad!
 
   \begin{block}{Reader}
-    \begin{code}
+    \begin{HASKELL}
       check :: Statement -> Reader Environment Bool
       check (Assign n e) = do
         env <- ask            -- We have to ask for it
         e =~ lookup n env     -- Use nice operator !\pause!
       check (If c ts fs) = c =~ BOOL <&> check ts <&> check fs
       ...
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
 \end{frame}
@@ -107,16 +107,16 @@
 
   Abstract error type:
 
-    \begin{code}
+    \begin{HASKELL}
       data Error = TypeMismatch Expression Type | ...
-    \end{code}
+    \end{HASKELL}
   
   \pause
 
   \begin{block}{}
-    \begin{code}
+    \begin{HASKELL}
       (=~) :: Expression -> Type -> (Bool,[Error])
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
   \pause
@@ -130,9 +130,9 @@
   Meet the Writer monad!
 
   \begin{block}{Writer}
-    \begin{code}
+    \begin{HASKELL}
       (=~) :: Expression -> Type -> Writer [Error] Bool
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
 \end{frame}
@@ -153,9 +153,9 @@
   Stack them:
 
   \begin{block}{}
-    \begin{code}
+    \begin{HASKELL}
       type Analyser = ReaderT Environment (Writer Error)
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
   using monad transformers!
@@ -179,20 +179,20 @@
 
   Abstract error type:
 
-    \begin{code}
+    \begin{HASKELL}
       data Error = TypeMismatch Expression Type | ...
-    \end{code}
+    \end{HASKELL}
   
   \pause
 
   \begin{block}{}
-    \begin{code}
+    \begin{HASKELL}
       (=~) :: Expression -> Type -> (Bool,[Error]) !\pause!
       Boolean _ =~ BOOL   = (True, [])
       Nil       =~ LIST _ = (True, [])
       ... !\pause!
       e         =~ t      = (False, [TypeMismatch e t])
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
   \pause
@@ -207,26 +207,26 @@
 \begin{frame}[fragile]{Writing Errors}
 
   \begin{block}{}
-    \begin{code}
+    \begin{HASKELL}
       (=~) :: Expression -> Type -> (Bool,[Error])
       Boolean _ =~ BOOL   = (True, [])
       Nil       =~ LIST _ = (True, [])
       ...
       e         =~ t      = (False, [TypeMismatch e t])
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
   Meet the Writer monad!
 
   \begin{block}{Writer}
-    \begin{code}
+    \begin{HASKELL}
       (=~) :: Expression -> Type -> Writer [Error] Bool
       Boolean _ =~ BOOL   = return True
       Nil       =~ LIST _ = return True
       e         =~ t      = do
         tell [TypeMismatch e t] -- We have to tell it
         return False
-    \end{code}
+    \end{HASKELL}
   \end{block}
 
 \end{frame}
@@ -248,3 +248,4 @@
           (instead of ``passing all things around'')
   \end{enumerate}
 
+% vim: ft=latex spell spl=en
