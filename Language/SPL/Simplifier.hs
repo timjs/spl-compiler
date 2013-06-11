@@ -64,6 +64,8 @@ instance Simplifiable Construct Statements where
                                        return $ ss |> Assign n e'
 
 instance Simplifiable Statement Statements where
+  simplify (Assign  n (Call m e)) = simplify e  >>= \(ss,e') ->
+                                return $ ss |> Assign n (Call m e')
   simplify (Assign  n e)      = simplify e  >>= \(ss,e') ->
                                 return $ ss |> Assign n e' 
   simplify (If      c ts fs)  = simplify c  >>= \(ss,c') ->
