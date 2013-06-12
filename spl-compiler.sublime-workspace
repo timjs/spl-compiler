@@ -1,0 +1,824 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "Language/SPL/Lexer.hs",
+			"settings":
+			{
+				"buffer_size": 1847,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Parser.hs",
+			"settings":
+			{
+				"buffer_size": 4869,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Printer.hs",
+			"settings":
+			{
+				"buffer_size": 909,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Simplifier.hs",
+			"settings":
+			{
+				"buffer_size": 5017,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Translator.hs",
+			"settings":
+			{
+				"buffer_size": 5586,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Analyser.hs",
+			"settings":
+			{
+				"buffer_size": 7298,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Data/Environment.hs",
+			"settings":
+			{
+				"buffer_size": 2584,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Data/Display.hs",
+			"settings":
+			{
+				"buffer_size": 679,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Data/Error.hs",
+			"settings":
+			{
+				"buffer_size": 2934,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Data/Instruction.hs",
+			"settings":
+			{
+				"buffer_size": 2598,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Data/Position.hs",
+			"settings":
+			{
+				"buffer_size": 327,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Language/SPL/Data/Program.hs",
+			"settings":
+			{
+				"buffer_size": 5462,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/User/ConTeXt.sublime-build",
+	"command_palette":
+	{
+		"height": 375.0,
+		"selected_items":
+		[
+			[
+				"packaup",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"sava",
+				"File: Save All"
+			],
+			[
+				"convsp",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"consp",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"prefhask",
+				"Preferences: SublimeHaskell Settings – User"
+			],
+			[
+				"haskell",
+				"SublimeHaskell: Browse module"
+			],
+			[
+				"che",
+				"SublimeHaskell: Check"
+			],
+			[
+				"sbhaskl",
+				"SublimeHaskell: Stylish"
+			],
+			[
+				"convtab",
+				"Indentation: Convert to Tabs"
+			],
+			[
+				"save",
+				"File: Save All"
+			],
+			[
+				"contab",
+				"Indentation: Convert to Tabs"
+			],
+			[
+				"confta",
+				"Code Folding: Fold Tag Attributes"
+			],
+			[
+				":ss",
+				"Set Syntax: Sublime Settings"
+			],
+			[
+				"sssubli",
+				"Set Syntax: Sublime Settings"
+			],
+			[
+				"ssjson",
+				"Set Syntax: Json Generic Object Elements"
+			],
+			[
+				"ssjso",
+				"Set Syntax: JSON"
+			],
+			[
+				"haskell ty",
+				"SublimeHaskell: Show type"
+			],
+			[
+				"haskellinf",
+				"SublimeHaskell: Show symbol info"
+			],
+			[
+				"sssubl",
+				"Set Syntax: Sublime Text Syntax Definition"
+			],
+			[
+				"sscon",
+				"Set Syntax: ConTeXt"
+			],
+			[
+				"ssyht",
+				"Set Syntax: HTML"
+			],
+			[
+				"clone file",
+				"Origami: Clone File to Pane Above"
+			],
+			[
+				"origclbel",
+				"Origami: Create Pane with File Below"
+			],
+			[
+				"pckdisc",
+				"Package Control: Discover Packages"
+			],
+			[
+				"orclbe",
+				"Origami: Clone File to Pane Below"
+			],
+			[
+				"origamiclon",
+				"Origami: Clone File to Pane Above"
+			],
+			[
+				"origami",
+				"Origami: Create Pane Above"
+			],
+			[
+				"instpc",
+				"Package Control: Install Package"
+			],
+			[
+				"ssynla",
+				"Set Syntax: LaTeX"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"status",
+				"View: Toggle Status Bar"
+			],
+			[
+				"sstex",
+				"Set Syntax: TeX"
+			],
+			[
+				"s",
+				"Snippet: Chapter"
+			],
+			[
+				"pckis",
+				"Package Control: Install Package"
+			],
+			[
+				"pck disc",
+				"Package Control: Discover Packages"
+			],
+			[
+				"pakls",
+				"Package Control: List Packages"
+			],
+			[
+				"pckins",
+				"Package Control: Install Package"
+			],
+			[
+				"pckcins",
+				"Package Control: Install Package"
+			],
+			[
+				"packinst",
+				"Package Control: Install Package"
+			],
+			[
+				"packdisc",
+				"Package Control: Discover Packages"
+			],
+			[
+				"package",
+				"Package Control: Discover Packages"
+			],
+			[
+				"pac",
+				"Package Control: Install Package"
+			],
+			[
+				"package c",
+				"Package Control: Install Package"
+			],
+			[
+				"Snippet: ",
+				"Snippet: Lorem ipsum"
+			]
+		],
+		"width": 435.0
+	},
+	"console":
+	{
+		"height": 139.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/Tim/Projecten/spl-compiler/spl.sublime-project",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/spl-compiler.sublime-project",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/spl-compiler.sublime-workspace",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ElasticTabstops/package-metadata.json",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Syntaxes/ConTeXt.tmLanguage.json",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/\\about.tmSnippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Commands/Italic.tmCommand",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Preferences/Symbol List.tmPreferences",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/info.plist",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Preferences/Miscellaneous.tmPreferences",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/\\definetabulate.tmSnippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/\\definetabulate.json",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/\\setupitemgroup.tmSnippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/Wrap Selection in \\start___\\stop.tmSnippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Support/bin/purge_contextfile",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Support/bin/check_contextfile",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Preferences/Comments.tmPreferences",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Preferences/Increase Decrease Patterns.tmPreferences",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/Chapter.tmSnippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/ConTeXt/Snippets/\\thinrules.tmSnippet",
+		"/Users/Tim/Projecten/documentdefinitions.tex",
+		"/Users/Tim/Documents/Universiteit/Vakken/Coaching/Analyse/analyse.tex",
+		"/Users/Tim/Projecten/documentlayout.tex",
+		"/Users/Tim/Documents/Universiteit/Vakken/Coaching/Analyse/literatuur.bib",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/Tim/Documents/Universiteit/Vakken/Coaching/Analyse/Markdown.mdown",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/ConTeXt.sublime-build",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/LaTeXTools/LaTeX.sublime-build",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Haskell/Haskell.sublime-build",
+		"/Users/Tim/Documents/Tests/koma.tex",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Default/Add Line Before.sublime-macro",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Theme - Default/Widget.sublime-settings",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Theme - Default/Widgets.stTheme",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Vintage/README.TXT",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/C#/Build.tmLanguage",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/C#/Build.tmLanguage.cache",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Pristine Packages/C++.sublime-package",
+		"/Users/Tim/Documents/Universiteit/Vakken/Archief/Leren en instructie/Praktijkopdracht/Omschrijving.mdown",
+		"/Users/Tim/Documents/Universiteit/Vakken/Archief/Vormgeven van onderwijs/Ontwerp/verantwoording.tex",
+		"/Users/Tim/Documents/Universiteit/Vakken/Archief/Vormgeven van onderwijs/Ontwerp/literatuur.bib",
+		"/Users/Tim/Documents/Universiteit/Vakken/Ordenen/Research A/FinalPaper/Contents/Introduction.tex",
+		"/Users/Tim/Documents/Universiteit/Vakken/Ordenen/Research A/FinalPaper/Paper.tex",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Haskell/Case.sublime-snippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/LaTeX/Comments.tmPreferences",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/LaTeX/begin{}-end{}.sublime-snippet",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Haskell/Haskell.tmLanguage"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"\\\\setupinterlinespacing",
+			"quotation",
+			"startquotation",
+			"cite",
+			"mijn",
+			"ik",
+			"korte",
+			"highlight_line",
+			"item",
+			"\\[",
+			"[",
+			" \\",
+			"main",
+			"extendSelection",
+			"extendselection",
+			"tab",
+			"close",
+			"color",
+			"color_scheme",
+			"th",
+			"h2",
+			"bla",
+			"save",
+			"font_size",
+			"Teaching"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": true,
+		"regex": true,
+		"replace_history":
+		[
+			"\\\\setupinterlinespace"
+		],
+		"reverse": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 11,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "Language/SPL/Lexer.hs",
+					"settings":
+					{
+						"buffer_size": 1847,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Language/SPL/Parser.hs",
+					"settings":
+					{
+						"buffer_size": 4869,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "Language/SPL/Printer.hs",
+					"settings":
+					{
+						"buffer_size": 909,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "Language/SPL/Simplifier.hs",
+					"settings":
+					{
+						"buffer_size": 5017,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "Language/SPL/Translator.hs",
+					"settings":
+					{
+						"buffer_size": 5586,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "Language/SPL/Analyser.hs",
+					"settings":
+					{
+						"buffer_size": 7298,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "Language/SPL/Data/Environment.hs",
+					"settings":
+					{
+						"buffer_size": 2584,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "Language/SPL/Data/Display.hs",
+					"settings":
+					{
+						"buffer_size": 679,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "Language/SPL/Data/Error.hs",
+					"settings":
+					{
+						"buffer_size": 2934,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "Language/SPL/Data/Instruction.hs",
+					"settings":
+					{
+						"buffer_size": 2598,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "Language/SPL/Data/Position.hs",
+					"settings":
+					{
+						"buffer_size": 327,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "Language/SPL/Data/Program.hs",
+					"settings":
+					{
+						"buffer_size": 5462,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 36.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 126.0
+	},
+	"output.haskell_error_checker":
+	{
+		"height": 126.0
+	},
+	"output.haskell_sublime_load":
+	{
+		"height": 126.0
+	},
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 145.0,
+	"status_bar_visible": true
+}
