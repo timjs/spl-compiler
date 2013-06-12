@@ -1,12 +1,15 @@
 {
-	"settings":
-	{
-		"draw_indent_guides": false
-	},
 	"folders":
 	[
 		{
+			"path": "Data"
+		},
+		{
 			"path": "Language/SPL"
 		}
-	]
+	],
+	"settings":
+	{
+		"draw_indent_guides": false
+	}
 }
