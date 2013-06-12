@@ -1,9 +1,5 @@
 .DS_Store
-*.swp
-
-# Haskell generated
-*.hi
-*.o
+dist/*
 
 # TeX helpers
 *.log
