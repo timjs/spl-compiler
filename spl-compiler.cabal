@@ -20,4 +20,7 @@ library
                        Data.MultiMap
   -- other-modules:
   build-depends:       base ==4.6.*, mtl ==2.1.*, containers ==0.5.*, parsec ==3.1.*, transformers ==0.3.*, ansi-wl-pprint ==0.6.*, monad-supply ==0.3.*
-  
+
+executable Run
+  main-is:             Utilities/Run.hs
+  build-depends:       base ==4.6.*, mtl ==2.1.*, containers ==0.5.*, parsec ==3.1.*, transformers ==0.3.*, ansi-wl-pprint ==0.6.*, monad-supply ==0.3.*
