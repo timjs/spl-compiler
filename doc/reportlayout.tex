@@ -1,0 +1,84 @@
+\startenvironment reportlayout
+\environment      documentdefinitions
+
+\setupbodyfont[lucida,10pt]
+\setupcapitals
+  [sc=yes]
+
+\setuppapersize[A4][A4]
+\setuplayout
+  [width=middle,
+   backspace=6pc,
+   cutspace=10pc,
+   margin=6pc,
+   height=middle,
+   header=0pc,
+   topspace=6pc,
+   footer=4pc,
+   bottomspace=6pc]
+\setuppagenumbering
+  [alternative=doublesided,
+   location={footer,right}]
+
+%\setupnote[footnote]
+  %[numbercommand=]% We don't want subscripts at the bottom of the page.
+%\setupnotation[footnote]
+  %[alternative=left,
+   %distance=0.5em]
+
+%\setupindenting[yes,medium]
+\setupwhitespace[medium]
+\setupblank[big]
+\setupitemgroup[itemize][each]
+  [packed]
+  [headstyle=\ss\bf,
+   indentnext=auto]
+
+\setuphead[chapter]
+  [style=\ss\bfc,
+   page=yes]
+\setuphead[section]
+  [style=\ss\bfb]
+   %before=\blank,
+   %after=\blank]
+\setuphead[subsection]
+  [style=\ss\bfa]
+
+\setupformulas
+  [align=right,
+   margin=yes,
+   spacebefore=big,
+   spaceafter=big,
+   indentnext=auto]
+
+\setupcaption[table]
+  [location=top]
+\setuptabulate
+  [rulethickness=1pt]
+
+\setupbibtex
+  [database=literature,
+   sort=author]
+\setuppublications
+  [alternative=apa,
+   sort=bbl,
+   criterium=text]
+
+\usemodule[vim]
+\setupvimtyping
+  [style=\tt,
+   numbering=no,
+   numberstyle=\ttx,
+   numberstep=5,
+   margin=2em,
+   before=\blank,
+   after=\blank,
+   indentnext=auto,
+   directory=buffers,
+   alternative=blackandwhite]
+\definevimtyping[SPL]
+  [syntax=spl]
+
+\stopenvironment
+
+% vim: ft=context

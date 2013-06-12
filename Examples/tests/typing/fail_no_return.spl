@@ -1,3 +1,0 @@
-Int foo(){
-	if(True){}
-}

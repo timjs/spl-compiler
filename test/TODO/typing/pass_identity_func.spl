@@ -1,0 +1,14 @@
+// Test: right types are infered in main
+
+t id(t x)
+{
+	return x;
+}
+
+Void main()
+{
+	Bool f = id(True);
+	Int g = id(5);
+	return;
+}
+

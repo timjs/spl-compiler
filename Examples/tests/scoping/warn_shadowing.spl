@@ -1,8 +1,0 @@
-// Test: generate warnings when shadowing
-
-Int x = 5;
-
-void foo(Bool x){
-	(Bool, Int) x = (x, 4);
-	x = (1, 2);
-}

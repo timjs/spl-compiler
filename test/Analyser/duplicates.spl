@@ -1,0 +1,10 @@
+// Duplicated names n and b
+Int n = 2;
+Int n = 3;
+Bool b = True;
+
+Bool b ()
+{
+    return True;
+}
+// vim: ft=c syn=spl

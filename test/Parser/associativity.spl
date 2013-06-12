@@ -1,0 +1,21 @@
+// Associativity
+
+Bool and (Bool b1, Bool b2, Bool b3)
+    {return b1 && b2 && b3;}
+
+Int plus (Int n)
+    {return n + 3 + 2 + 1;}
+
+Int minus (Int n)
+    {return n - 3 - 2 - 1;}
+
+Int div (Int n)
+    {return n / 3 / 2 / 1;}
+
+Int plusAndMul (Int n)
+    {return n * n + n * n;}
+
+Int negate (Int n)
+    {return n + -5;}
+
+// vim: ft=c syn=spl

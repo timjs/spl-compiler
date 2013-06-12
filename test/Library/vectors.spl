@@ -1,0 +1,19 @@
+// Vector operations
+
+Int create (Int n) {
+    return (n, (n, n));
+}
+
+(Int, (Int, Int)) add ((Int, (Int, Int)) v1, (Int, (Int, Int)) v2) {
+    return (fst(v1) + fst(v2),(
+            fst(snd(v1)) + fst(snd(v2)),
+            snd(snd(v1)) + snd(snd(v2))));
+}
+
+(Int, (Int, Int)) scale ((Int, (Int, Int)) v, Int f) {
+    return (fst(v)*f,(
+            fst(snd(v))*f,
+            snd(snd(v))*f));
+}
+
+// vim: ft=c syn=spl

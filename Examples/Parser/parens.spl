@@ -1,8 +1,0 @@
-// A lot of parens!
-
-Int foo()
-{
-  return ((((((((((((((((((((-10))))))))))))))))))));
-}
-
-// vim: ft=c syn=spl

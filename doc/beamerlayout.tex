@@ -1,0 +1,37 @@
+\documentclass{beamer}
+
+\usepackage[british]{babel}
+\usepackage{graphicx,hyperref,calc}
+\usepackage{wasysym}
+
+\usepackage{ru}
+\usepackage{bera}
+
+\usepackage{booktabs}
+
+\usepackage{listings}
+\lstset
+  {basicstyle=\ttfamily\small,
+   gobble=6,
+   escapeinside=!!}
+\lstMakeShortInline | %@
+
+\useoutertheme[subsection=false]{smoothbars}
+%\useinnertheme{rectangles}
+
+\newenvironment{twocolumns}[1][0.45]{
+  \begin{columns}
+    \begin{column}{#1\textwidth}
+      \newcommand{\nextcolumn}[1][]{
+      \end{column}
+      \begin{column}[##1]{\textwidth-#1\textwidth-0.1\textwidth}
+      }
+    }{
+    \end{column}
+  \end{columns}
+}
+
+\newcommand{\SPL}
+  {SPL}
+
+% vim: ft=latex

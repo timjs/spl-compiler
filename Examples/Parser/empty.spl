@@ -1,6 +1,0 @@
-// Een functiebody kan niet leeg zijn, dus dit kan niet geparseerd worden.
-Void main ()
-{
-}
-
-// vim: ft=c syn=spl

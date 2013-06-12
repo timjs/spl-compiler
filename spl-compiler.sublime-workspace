@@ -16,14 +16,6 @@
 			}
 		},
 		{
-			"file": "Language/SPL/Parser.hs",
-			"settings":
-			{
-				"buffer_size": 4869,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "Language/SPL/Printer.hs",
 			"settings":
 			{
@@ -96,7 +88,10 @@
 			}
 		},
 		{
+			"contents": "{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, OverlappingInstances #-}\nmodule Language.SPL.Data.Program where\n\nimport Language.SPL.Data.Position\n\nimport Language.SPL.Printer\n\n\n-- Types -----------------------------------------------------------------------\n\ntype Program    = Constructs\ntype Constructs = [Construct]\n\ndata Construct = Declaration Type Name Expression\n               | Definition  Type Name Parameters Constructs Statements\n               deriving (Show, Eq, Ord)\n\ndata Type = VOID\n          | INT\n          | BOOL\n          | PAIR Type Type\n          | LIST Type\n          | POLY String\n          deriving (Show, Eq, Ord)\ndata Name = Main\n          | Print\n          | IsEmpty\n          | Head\n          | Tail\n          | Fst\n          | Snd\n          | Name String\n          deriving (Eq, Ord)\n\ntype Parameters = [Parameter]\ndata Parameter  = Parameter Type Name\n                deriving (Show, Eq, Ord)\n\ntype Arguments  = [Argument]\ntype Argument   = Expression\n\ntype Statements = [Statement]\ndata Statement  = Assign  Name Expression\n                | If      Expression Statements Statements\n                | While   Expression Statements\n                | Return  (Maybe Expression)\n                | Execute Name Arguments\n                deriving (Show, Eq, Ord)\n\ntype Expressions = [Expression]\ndata Expression  = Value    Name\n                 | Integer  Integer\n                 | Boolean  Bool\n                 | List\n                 | Pair     Expression Expression\n                 | Call     Name Arguments\n                 | Infix    BinaryOperator Expression Expression\n                 | Prefix   UnaryOperator Expression\n                 deriving (Show, Eq, Ord)\n\ndata BinaryOperator = Add | Sub | Mul | Div | Mod\n                    | Eq | Ne | Lt | Gt | Le | Ge \n                    | And | Or | Cons\n                    deriving (Show, Eq, Ord, Enum)\ndata UnaryOperator  = Not | Neg\n                    deriving (Show, Eq, Ord, Enum)\n\ntype Arrity      = Int\ntype Signature   = [Type]\n\nisDefinition :: Construct -> Bool\nisDefinition (Definition _ _ _ _ _) = True\nisDefinition _                      = False\n\nisDeclaration :: Construct -> Bool\nisDeclaration (Declaration _ _ _) = True\nisDeclaration _                   = False\n\nisMain :: Construct -> Bool\nisMain (Definition _ Main _ _ _) = True\nisMain _                         = False\n\n-- Manual Show -----------------------------------------------------------------\n\ninstance Show Name where\n  show Main     = \"main\"\n  show Print    = \"print\"\n  show IsEmpty  = \"isEmpty\"\n  show Head     = \"head\"\n  show Tail     = \"tail\"\n  show Fst      = \"fst\"\n  show Snd      = \"snd\"\n  show (Name s) = s\n\n-- Pretty Printer --------------------------------------------------------------\n\ninstance Pretty Program where\n  pretty = vsep . map pretty\n\ninstance Pretty Construct where\n  pretty (Declaration t n e)    = pretty t <+> pretty n <+>\n                                  align (equals <+> pretty e) <> semi\n  pretty (Definition t n p d b) = empty <$>\n                                  pretty t <+> pretty n <+> pretty p <+>\n                                  block (pretty d <$> pretty b)\n\ninstance Pretty Type where\n  pretty VOID       = annotation \"Void\"\n  pretty INT        = annotation \"Int\"\n  pretty BOOL       = annotation \"Bool\"\n  pretty (PAIR s t) = parensized [s,t]\n  pretty (LIST t)   = brackets (pretty t)\n  pretty (POLY s)   = annotation s\n\ninstance Pretty Name where\n  pretty Print    = identifier \"print\"\n  pretty IsEmpty  = identifier \"isEmpty\"\n  pretty Head     = identifier \"head\"\n  pretty Tail     = identifier \"tail\"\n  pretty Fst      = identifier \"fst\"\n  pretty Snd      = identifier \"snd\"\n  pretty Main     = identifier \"main\"\n  pretty (Name s) = identifier s\n\ninstance Pretty Parameters where\n  pretty = parensized\n\ninstance Pretty Parameter where\n  pretty (Parameter t n) = pretty t <+> pretty n\n\ninstance Pretty Arguments where\n  pretty = parensized\n\ninstance Pretty Statements where\n  pretty = vsep . map pretty\n\ninstance Pretty Statement where\n  pretty (Assign n e)  = pretty n <+> equals <+> pretty e <> semi\n  pretty (Execute n a) = pretty n <> pretty a <> semi\n  pretty (Return m)    = keyword \"return\" <+> pretty m <> semi\n  pretty (If c t e)    = keyword \"if\" <+> parens (pretty c) <+> \n                         block t <+>\n                         keyword \"else\" <+>\n                         block e\n  pretty (While c l)   = keyword \"while\" <+> parens (pretty c) <+>\n                         block l\n\ninstance Pretty Expression where\n  pretty (Value n)     = pretty n\n  pretty (Integer i)   = constant i\n  pretty (Boolean b)   = constant b\n  pretty (List)        = constant \"[]\"\n  pretty (Pair x y)    = parensized [x,y]\n  pretty (Call n as)   = pretty n <> pretty as\n  pretty (Infix o l r) = parens . align $ pretty l <+> pretty o </> pretty r\n  pretty (Prefix o e)  = parens $ pretty o <> pretty e\n\ninstance Pretty BinaryOperator where\n  pretty Add  = operator '+'\n  pretty Sub  = operator '-'\n  pretty Mul  = operator '*'\n  pretty Div  = operator '/'\n  pretty Mod  = operator '%'\n  pretty Eq   = operator \"==\"\n  pretty Ne   = operator \"!=\"\n  pretty Lt   = operator '<'\n  pretty Gt   = operator '>'\n  pretty Le   = operator \"<=\"\n  pretty Ge   = operator \">=\"\n  pretty And  = operator \"&&\"\n  pretty Or   = operator \"||\"\n  pretty Cons = operator ':'\n\ninstance Pretty UnaryOperator where\n  pretty Not = operator '!'\n  pretty Neg = operator '-'\n\n",
 			"file": "Language/SPL/Data/Program.hs",
+			"file_size": 5462,
+			"file_write_time": 1368822949000000,
 			"settings":
 			{
 				"buffer_size": 5462,
@@ -107,9 +102,21 @@
 	"build_system": "Packages/User/ConTeXt.sublime-build",
 	"command_palette":
 	{
-		"height": 375.0,
+		"height": 49.0,
 		"selected_items":
 		[
+			[
+				"add fol",
+				"Project: Add Folder"
+			],
+			[
+				"ssss",
+				"Set Syntax: Sublime Settings"
+			],
+			[
+				"sssublse",
+				"Set Syntax: Sublime Settings"
+			],
 			[
 				"packaup",
 				"Package Control: Upgrade Package"
@@ -304,6 +311,8 @@
 	},
 	"file_history":
 	[
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Parser.hs",
+		"/Users/Tim/Projecten/spl-compiler/spl-compiler.sublime-project",
 		"/Users/Tim/Projecten/spl-compiler/spl.sublime-project",
 		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 		"/Users/Tim/Projecten/spl-compiler/Language/SPL/spl-compiler.sublime-project",
@@ -413,7 +422,7 @@
 	"groups":
 	[
 		{
-			"selected": 11,
+			"selected": 10,
 			"sheets":
 			[
 				{
@@ -446,34 +455,6 @@
 				},
 				{
 					"buffer": 1,
-					"file": "Language/SPL/Parser.hs",
-					"settings":
-					{
-						"buffer_size": 4869,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "Language/SPL/Printer.hs",
 					"settings":
 					{
@@ -501,7 +482,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 2,
 					"file": "Language/SPL/Simplifier.hs",
 					"settings":
 					{
@@ -529,7 +510,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 3,
 					"file": "Language/SPL/Translator.hs",
 					"settings":
 					{
@@ -557,7 +538,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 4,
 					"file": "Language/SPL/Analyser.hs",
 					"settings":
 					{
@@ -585,7 +566,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 6,
+					"buffer": 5,
 					"file": "Language/SPL/Data/Environment.hs",
 					"settings":
 					{
@@ -613,7 +594,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 7,
+					"buffer": 6,
 					"file": "Language/SPL/Data/Display.hs",
 					"settings":
 					{
@@ -639,7 +620,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 7,
 					"file": "Language/SPL/Data/Error.hs",
 					"settings":
 					{
@@ -667,7 +648,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 8,
 					"file": "Language/SPL/Data/Instruction.hs",
 					"settings":
 					{
@@ -695,7 +676,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 10,
+					"buffer": 9,
 					"file": "Language/SPL/Data/Position.hs",
 					"settings":
 					{
@@ -721,7 +702,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 10,
 					"file": "Language/SPL/Data/Program.hs",
 					"settings":
 					{
@@ -732,8 +713,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								1665,
+								1665
 							]
 						],
 						"settings":
@@ -743,7 +724,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 666.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
