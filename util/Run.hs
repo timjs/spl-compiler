@@ -33,6 +33,7 @@ main = do
           print $ pretty p'
           putAct "Compiling"
           let c = compile p'
+          print c
           print $ pretty c
           writeFile (replaceExtension f ".ssm") (dullify c)
         else do

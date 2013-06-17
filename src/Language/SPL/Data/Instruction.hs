@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ViewPatterns #-}
 module Language.SPL.Data.Instruction where
 
-import Language.SPL.Printer (Pretty,pretty,text,char,vsep,(<>),(<+>))
+import Language.SPL.Printer (Pretty,pretty,text,char,vsep,fill,indent,(<>),(<+>))
 
 import Prelude hiding (null)
 
@@ -54,6 +54,9 @@ type Instructions = Seq Instruction
 
 -- Annotateable ----------------------------------------------------------------
 
+infixl 8 #
+infixr 9 ##
+
 class Annotatable a where
   (#)  :: Label -> a -> a
   (##) :: a -> Comment -> a
@@ -75,11 +78,13 @@ instance Annotatable Instructions where
 
 -- Pretty Printer --------------------------------------------------------------
 
+tabstop :: Int
+tabstop = 16
+
 instance Pretty Instruction where
-  pretty (l :#  i) = text l <> char ':' <> pretty i
-  pretty (i :## c) = pretty i <> char ';' <+> text c
-  pretty i         = text "\t\t" <> text s <> text "\t\t"
-           where s = show i \\ ['(', ')', '"', '"', '\''] -- For () around -1, "" around labels and ' of LDC'
+  pretty (l :#  i) = fill tabstop (text l <> char ':') <> pretty i
+  pretty (i :## c) = indent tabstop (pretty i) <> char ';' <+> text c
+  pretty i         = fill tabstop (text $ show i \\ ['(', ')', '"', '"', '\'']) -- For () around -1, "" around labels and ' of LDC'
 
 instance Pretty Instructions where
   pretty = vsep . map pretty . toList
