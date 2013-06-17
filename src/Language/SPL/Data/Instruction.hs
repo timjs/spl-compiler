@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ViewPatterns #-}
 module Language.SPL.Data.Instruction where
 
-import Language.SPL.Printer (Pretty,pretty,text,char,vsep,indent,fill,(<>))
+import Language.SPL.Printer (Pretty,pretty,text,char,vsep,indent,fill,(<>),(<+>))
 
 import Prelude hiding (length)
 
@@ -81,10 +81,10 @@ instance Pretty Instruction where
   pretty (Instruction [l] o [])  = fill tabstop (text l <> char ':') <>
                                    pretty o
   pretty (Instruction []  o [c]) = indent tabstop (fill tabstop (pretty o)) <>
-                                   char ';' <> text c
+                                   char ';' <+> text c
   pretty (Instruction [l] o [c]) = fill tabstop (text l <> char ':') <>
                                    fill tabstop (pretty o) <>
-                                   char ';' <> text c
+                                   char ';' <+> text c
   pretty _                       = error "multiple annotations in instruction not implemented"
 
 instance Pretty Instructions where
