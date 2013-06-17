@@ -2,10 +2,13 @@
 	"folders":
 	[
 		{
-			"path": "Data"
+			"path": "src/Language/SPL"
 		},
 		{
-			"path": "Language/SPL"
+			"path": "src/Data"
+		},
+		{
+			"path": "util"
 		}
 	],
 	"settings":

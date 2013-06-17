@@ -1,4 +1,4 @@
-module Utilities.Demo where
+module Main where
 
 import Language.SPL.Parser
 import Language.SPL.Printer

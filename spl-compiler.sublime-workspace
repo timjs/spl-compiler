@@ -8,103 +8,172 @@
 	"buffers":
 	[
 		{
-			"file": "Language/SPL/Lexer.hs",
+			"file": "src/Language/SPL/Simplifier.hs",
 			"settings":
 			{
-				"buffer_size": 1847,
+				"buffer_size": 5071,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "Language/SPL/Printer.hs",
+			"file": "src/Language/SPL/Translator.hs",
 			"settings":
 			{
-				"buffer_size": 909,
+				"buffer_size": 6557,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "Language/SPL/Simplifier.hs",
+			"file": "src/Language/SPL/Data/Display.hs",
 			"settings":
 			{
-				"buffer_size": 5017,
+				"buffer_size": 671,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "Language/SPL/Translator.hs",
-			"settings":
-			{
-				"buffer_size": 5586,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Language/SPL/Analyser.hs",
-			"settings":
-			{
-				"buffer_size": 7298,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Language/SPL/Data/Environment.hs",
-			"settings":
-			{
-				"buffer_size": 2584,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Language/SPL/Data/Display.hs",
-			"settings":
-			{
-				"buffer_size": 679,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Language/SPL/Data/Error.hs",
-			"settings":
-			{
-				"buffer_size": 2934,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Language/SPL/Data/Instruction.hs",
-			"settings":
-			{
-				"buffer_size": 2598,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "Language/SPL/Data/Position.hs",
-			"settings":
-			{
-				"buffer_size": 327,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, OverlappingInstances #-}\nmodule Language.SPL.Data.Program where\n\nimport Language.SPL.Data.Position\n\nimport Language.SPL.Printer\n\n\n-- Types -----------------------------------------------------------------------\n\ntype Program    = Constructs\ntype Constructs = [Construct]\n\ndata Construct = Declaration Type Name Expression\n               | Definition  Type Name Parameters Constructs Statements\n               deriving (Show, Eq, Ord)\n\ndata Type = VOID\n          | INT\n          | BOOL\n          | PAIR Type Type\n          | LIST Type\n          | POLY String\n          deriving (Show, Eq, Ord)\ndata Name = Main\n          | Print\n          | IsEmpty\n          | Head\n          | Tail\n          | Fst\n          | Snd\n          | Name String\n          deriving (Eq, Ord)\n\ntype Parameters = [Parameter]\ndata Parameter  = Parameter Type Name\n                deriving (Show, Eq, Ord)\n\ntype Arguments  = [Argument]\ntype Argument   = Expression\n\ntype Statements = [Statement]\ndata Statement  = Assign  Name Expression\n                | If      Expression Statements Statements\n                | While   Expression Statements\n                | Return  (Maybe Expression)\n                | Execute Name Arguments\n                deriving (Show, Eq, Ord)\n\ntype Expressions = [Expression]\ndata Expression  = Value    Name\n                 | Integer  Integer\n                 | Boolean  Bool\n                 | List\n                 | Pair     Expression Expression\n                 | Call     Name Arguments\n                 | Infix    BinaryOperator Expression Expression\n                 | Prefix   UnaryOperator Expression\n                 deriving (Show, Eq, Ord)\n\ndata BinaryOperator = Add | Sub | Mul | Div | Mod\n                    | Eq | Ne | Lt | Gt | Le | Ge \n                    | And | Or | Cons\n                    deriving (Show, Eq, Ord, Enum)\ndata UnaryOperator  = Not | Neg\n                    deriving (Show, Eq, Ord, Enum)\n\ntype Arrity      = Int\ntype Signature   = [Type]\n\nisDefinition :: Construct -> Bool\nisDefinition (Definition _ _ _ _ _) = True\nisDefinition _                      = False\n\nisDeclaration :: Construct -> Bool\nisDeclaration (Declaration _ _ _) = True\nisDeclaration _                   = False\n\nisMain :: Construct -> Bool\nisMain (Definition _ Main _ _ _) = True\nisMain _                         = False\n\n-- Manual Show -----------------------------------------------------------------\n\ninstance Show Name where\n  show Main     = \"main\"\n  show Print    = \"print\"\n  show IsEmpty  = \"isEmpty\"\n  show Head     = \"head\"\n  show Tail     = \"tail\"\n  show Fst      = \"fst\"\n  show Snd      = \"snd\"\n  show (Name s) = s\n\n-- Pretty Printer --------------------------------------------------------------\n\ninstance Pretty Program where\n  pretty = vsep . map pretty\n\ninstance Pretty Construct where\n  pretty (Declaration t n e)    = pretty t <+> pretty n <+>\n                                  align (equals <+> pretty e) <> semi\n  pretty (Definition t n p d b) = empty <$>\n                                  pretty t <+> pretty n <+> pretty p <+>\n                                  block (pretty d <$> pretty b)\n\ninstance Pretty Type where\n  pretty VOID       = annotation \"Void\"\n  pretty INT        = annotation \"Int\"\n  pretty BOOL       = annotation \"Bool\"\n  pretty (PAIR s t) = parensized [s,t]\n  pretty (LIST t)   = brackets (pretty t)\n  pretty (POLY s)   = annotation s\n\ninstance Pretty Name where\n  pretty Print    = identifier \"print\"\n  pretty IsEmpty  = identifier \"isEmpty\"\n  pretty Head     = identifier \"head\"\n  pretty Tail     = identifier \"tail\"\n  pretty Fst      = identifier \"fst\"\n  pretty Snd      = identifier \"snd\"\n  pretty Main     = identifier \"main\"\n  pretty (Name s) = identifier s\n\ninstance Pretty Parameters where\n  pretty = parensized\n\ninstance Pretty Parameter where\n  pretty (Parameter t n) = pretty t <+> pretty n\n\ninstance Pretty Arguments where\n  pretty = parensized\n\ninstance Pretty Statements where\n  pretty = vsep . map pretty\n\ninstance Pretty Statement where\n  pretty (Assign n e)  = pretty n <+> equals <+> pretty e <> semi\n  pretty (Execute n a) = pretty n <> pretty a <> semi\n  pretty (Return m)    = keyword \"return\" <+> pretty m <> semi\n  pretty (If c t e)    = keyword \"if\" <+> parens (pretty c) <+> \n                         block t <+>\n                         keyword \"else\" <+>\n                         block e\n  pretty (While c l)   = keyword \"while\" <+> parens (pretty c) <+>\n                         block l\n\ninstance Pretty Expression where\n  pretty (Value n)     = pretty n\n  pretty (Integer i)   = constant i\n  pretty (Boolean b)   = constant b\n  pretty (List)        = constant \"[]\"\n  pretty (Pair x y)    = parensized [x,y]\n  pretty (Call n as)   = pretty n <> pretty as\n  pretty (Infix o l r) = parens . align $ pretty l <+> pretty o </> pretty r\n  pretty (Prefix o e)  = parens $ pretty o <> pretty e\n\ninstance Pretty BinaryOperator where\n  pretty Add  = operator '+'\n  pretty Sub  = operator '-'\n  pretty Mul  = operator '*'\n  pretty Div  = operator '/'\n  pretty Mod  = operator '%'\n  pretty Eq   = operator \"==\"\n  pretty Ne   = operator \"!=\"\n  pretty Lt   = operator '<'\n  pretty Gt   = operator '>'\n  pretty Le   = operator \"<=\"\n  pretty Ge   = operator \">=\"\n  pretty And  = operator \"&&\"\n  pretty Or   = operator \"||\"\n  pretty Cons = operator ':'\n\ninstance Pretty UnaryOperator where\n  pretty Not = operator '!'\n  pretty Neg = operator '-'\n\n",
-			"file": "Language/SPL/Data/Program.hs",
-			"file_size": 5462,
-			"file_write_time": 1368822949000000,
+			"file": "src/Language/SPL/Data/Program.hs",
 			"settings":
 			{
 				"buffer_size": 5462,
 				"line_ending": "Unix"
 			}
+		},
+		{
+			"file": "src/Language/SPL/Printer.hs",
+			"settings":
+			{
+				"buffer_size": 1200,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/Language/SPL/Data/Instruction.hs",
+			"settings":
+			{
+				"buffer_size": 2778,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/Language/SPL/Data/Environment.hs",
+			"settings":
+			{
+				"buffer_size": 2732,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/Language/SPL/Data/Error.hs",
+			"settings":
+			{
+				"buffer_size": 2934,
+				"line_ending": "Unix"
+			}
 		}
 	],
-	"build_system": "Packages/User/ConTeXt.sublime-build",
+	"build_system": "",
 	"command_palette":
 	{
-		"height": 49.0,
+		"height": 27.0,
 		"selected_items":
 		[
+			[
+				"build",
+				"SublimeHaskell: Build"
+			],
+			[
+				"rebui",
+				"SublimeHaskell: Rebuild"
+			],
+			[
+				"haskell",
+				"SublimeHaskell: Rebuild"
+			],
+			[
+				"packlis",
+				"Package Control: List Packages"
+			],
+			[
+				"packins",
+				"Package Control: Install Package"
+			],
+			[
+				"pckins",
+				"Package Control: Install Package"
+			],
+			[
+				"pckrem",
+				"Package Control: Remove Package"
+			],
+			[
+				"packinst",
+				"Package Control: Install Package"
+			],
+			[
+				"haskch",
+				"SublimeHaskell: Check & Lint"
+			],
+			[
+				"lint",
+				"SublimeHaskell: Check & Lint"
+			],
+			[
+				"keybu",
+				"Preferences: Key Bindings - User"
+			],
+			[
+				"ali",
+				"Align Tabular"
+			],
+			[
+				"align",
+				"Align Tabular"
+			],
+			[
+				":haske",
+				"Set Syntax: Haskell"
+			],
+			[
+				":align",
+				"Set Syntax: AlignTab"
+			],
+			[
+				"packre",
+				"Package Control: Remove Package"
+			],
+			[
+				"disco",
+				"Package Control: Discover Packages"
+			],
+			[
+				"alig",
+				"Align Tabular"
+			],
+			[
+				"packin",
+				"Package Control: Install Package"
+			],
+			[
+				"packrem",
+				"Package Control: Remove Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"pckdisc",
+				"Package Control: Discover Packages"
+			],
+			[
+				"styl",
+				"SublimeHaskell: Stylish"
+			],
 			[
 				"add fol",
 				"Project: Add Folder"
@@ -136,10 +205,6 @@
 			[
 				"prefhask",
 				"Preferences: SublimeHaskell Settings – User"
-			],
-			[
-				"haskell",
-				"SublimeHaskell: Browse module"
 			],
 			[
 				"che",
@@ -210,10 +275,6 @@
 				"Origami: Create Pane with File Below"
 			],
 			[
-				"pckdisc",
-				"Package Control: Discover Packages"
-			],
-			[
 				"orclbe",
 				"Origami: Clone File to Pane Below"
 			],
@@ -232,10 +293,6 @@
 			[
 				"ssynla",
 				"Set Syntax: LaTeX"
-			],
-			[
-				"instal",
-				"Package Control: Install Package"
 			],
 			[
 				"status",
@@ -262,15 +319,7 @@
 				"Package Control: List Packages"
 			],
 			[
-				"pckins",
-				"Package Control: Install Package"
-			],
-			[
 				"pckcins",
-				"Package Control: Install Package"
-			],
-			[
-				"packinst",
 				"Package Control: Install Package"
 			],
 			[
@@ -311,8 +360,32 @@
 	},
 	"file_history":
 	[
-		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Parser.hs",
+		"/Users/Tim/Projecten/spl-compiler/src/Language/SPL/Analyser.hs",
 		"/Users/Tim/Projecten/spl-compiler/spl-compiler.sublime-project",
+		"/Users/Tim/Projecten/spl-compiler/src/Language/SPL/Data/test.hs",
+		"/Users/Tim/Projecten/spl-compiler/util/run.hs",
+		"/Users/Tim/Projecten/spl-compiler/src/Language/SPL/Data/Position.hs",
+		"/Users/Tim/Projecten/spl-compiler/src/Language/SPL/Printer.hs",
+		"/Users/Tim/Projecten/spl-compiler/bla",
+		"/Users/Tim/Projecten/spl-compiler/spl-compiler.cabal",
+		"/Users/Tim/Projecten/spl-compiler/util/Demo.hs",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/Tim/Projecten/spl-compiler/src/Language/SPL/Parser.hs",
+		"/Users/Tim/Projecten/spl-compiler/src/Language/SPL/Lexer.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Data/Instruction.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Data/Error.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Data/Environment.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Analyser.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Translator.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Simplifier.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Printer.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Data/Program.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Data/Position.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Data/Display.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Lexer.hs",
+		"/Users/Tim/Projecten/spl-compiler/util/unlit.hs",
+		"/Users/Tim/Projecten/spl-compiler/Language/SPL/Parser.hs",
 		"/Users/Tim/Projecten/spl-compiler/spl.sublime-project",
 		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 		"/Users/Tim/Projecten/spl-compiler/Language/SPL/spl-compiler.sublime-project",
@@ -338,8 +411,6 @@
 		"/Users/Tim/Documents/Universiteit/Vakken/Coaching/Analyse/analyse.tex",
 		"/Users/Tim/Projecten/documentlayout.tex",
 		"/Users/Tim/Documents/Universiteit/Vakken/Coaching/Analyse/literatuur.bib",
-		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
-		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
 		"/Users/Tim/Documents/Universiteit/Vakken/Coaching/Analyse/Markdown.mdown",
 		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/User/ConTeXt.sublime-build",
 		"/Users/Tim/Library/Application Support/Sublime Text 2/Packages/Default/Default (OSX).sublime-keymap",
@@ -379,6 +450,31 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"show",
+			"singleton",
+			"show",
+			"show \\(pretty (\\w+)\\)",
+			"show (pretty \\w+)",
+			"pretty",
+			"dull",
+			"      =",
+			"e",
+			"Variable",
+			" ##",
+			":#",
+			"os",
+			"is",
+			"Placement",
+			"Location",
+			"pretty",
+			"compact",
+			"comment",
+			"color",
+			">>=",
+			"( +)(.+) >>= \\\\(.+) ->",
+			" +\\n",
+			"\\s+\\n",
+			"= (.+) >>= \\\\(.+) ->",
 			"\\\\setupinterlinespacing",
 			"quotation",
 			"startquotation",
@@ -411,9 +507,16 @@
 		"regex": true,
 		"replace_history":
 		[
+			"dullify \\1",
+			"dullify",
+			"pretty",
+			"#",
+			"\\1   \\3 <- \\2",
+			"\\n",
+			"= do \\2 <- \\1",
 			"\\\\setupinterlinespace"
 		],
-		"reverse": true,
+		"reverse": false,
 		"show_context": true,
 		"use_buffer2": true,
 		"whole_word": false,
@@ -422,23 +525,23 @@
 	"groups":
 	[
 		{
-			"selected": 10,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "Language/SPL/Lexer.hs",
+					"file": "src/Language/SPL/Simplifier.hs",
 					"settings":
 					{
-						"buffer_size": 1847,
+						"buffer_size": 5071,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								2159,
+								2159
 							]
 						],
 						"settings":
@@ -455,158 +558,49 @@
 				},
 				{
 					"buffer": 1,
-					"file": "Language/SPL/Printer.hs",
+					"file": "src/Language/SPL/Translator.hs",
 					"settings":
 					{
-						"buffer_size": 909,
+						"buffer_size": 6557,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								289,
+								289
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
 							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": true,
+							"vintage_lines.line": 87,
+							"vintage_lines.lines": 112,
+							"vintage_lines.mode": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1462.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "Language/SPL/Simplifier.hs",
+					"file": "src/Language/SPL/Data/Display.hs",
 					"settings":
 					{
-						"buffer_size": 5017,
+						"buffer_size": 671,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "Language/SPL/Translator.hs",
-					"settings":
-					{
-						"buffer_size": 5586,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "Language/SPL/Analyser.hs",
-					"settings":
-					{
-						"buffer_size": 7298,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "Language/SPL/Data/Environment.hs",
-					"settings":
-					{
-						"buffer_size": 2584,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "Language/SPL/Data/Display.hs",
-					"settings":
-					{
-						"buffer_size": 679,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
+								263,
+								263
 							]
 						],
 						"settings":
@@ -620,8 +614,137 @@
 					"type": "text"
 				},
 				{
+					"buffer": 3,
+					"file": "src/Language/SPL/Data/Program.hs",
+					"settings":
+					{
+						"buffer_size": 5462,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4852,
+								4852
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1765.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/Language/SPL/Printer.hs",
+					"settings":
+					{
+						"buffer_size": 1200,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								218,
+								218
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 80.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 5,
+					"file": "src/Language/SPL/Data/Instruction.hs",
+					"settings":
+					{
+						"buffer_size": 2778,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2778,
+								2778
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"vintage_lines.line": 41,
+							"vintage_lines.lines": 74,
+							"vintage_lines.mode": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 723.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/Language/SPL/Data/Environment.hs",
+					"settings":
+					{
+						"buffer_size": 2732,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2278,
+								2278
+							],
+							[
+								2511,
+								2511
+							]
+						],
+						"settings":
+						{
+							"line_numbers": true,
+							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"vintage_lines.line": 14,
+							"vintage_lines.lines": 77,
+							"vintage_lines.mode": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 561.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
 					"buffer": 7,
-					"file": "Language/SPL/Data/Error.hs",
+					"file": "src/Language/SPL/Data/Error.hs",
 					"settings":
 					{
 						"buffer_size": 2934,
@@ -646,88 +769,6 @@
 						"zoom_level": 1.0
 					},
 					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "Language/SPL/Data/Instruction.hs",
-					"settings":
-					{
-						"buffer_size": 2598,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "Language/SPL/Data/Position.hs",
-					"settings":
-					{
-						"buffer_size": 327,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "Language/SPL/Data/Program.hs",
-					"settings":
-					{
-						"buffer_size": 5462,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1665,
-								1665
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/SublimeHaskell/Haskell-SublimeHaskell.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 666.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
 				}
 			]
 		}
@@ -738,7 +779,7 @@
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 37.0
 	},
 	"layout":
 	{
@@ -749,11 +790,18 @@
 				0,
 				1,
 				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.775755212523,
 			1.0
 		],
 		"rows":
@@ -772,6 +820,10 @@
 		"height": 126.0
 	},
 	"output.haskell_sublime_load":
+	{
+		"height": 126.0
+	},
+	"output.sublime_haskell_hdevtools_type":
 	{
 		"height": 126.0
 	},
@@ -799,7 +851,7 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 145.0,
 	"status_bar_visible": true
 }

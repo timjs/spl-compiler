@@ -19,11 +19,11 @@ library
                        Language.SPL.Data.Display, Language.SPL.Data.Environment, Language.SPL.Data.Error, Language.SPL.Data.Instruction, Language.SPL.Data.Position, Language.SPL.Data.Program,
                        Data.MultiMap
   -- other-modules:
-  build-depends:       base ==4.6.*, mtl ==2.1.*, containers ==0.5.*, parsec ==3.1.*, transformers ==0.3.*, ansi-wl-pprint ==0.6.*, monad-supply ==0.3.*
+  build-depends:       base, mtl, transformers, containers, parsec, ansi-wl-pprint, monad-supply, filepath
   hs-source-dirs:      src
 
-executable Run
-  main-is:             Run.hs
-  build-depends:       base ==4.6.*, mtl ==2.1.*, containers ==0.5.*, parsec ==3.1.*, transformers ==0.3.*, ansi-wl-pprint ==0.6.*, monad-supply ==0.3.*,
+executable run
+  main-is:             run.hs
+  build-depends:       base, mtl, transformers, containers, parsec, ansi-wl-pprint, monad-supply, filepath,
                        spl-compiler
   hs-source-dirs:      util
