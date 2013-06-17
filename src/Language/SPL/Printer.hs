@@ -9,10 +9,13 @@ module Language.SPL.Printer
   , identifier
   , comment
   , operator
+  , dullify
+  , prettify
   ) where
 
 import Text.PrettyPrint.ANSI.Leijen
 
+tabstop :: Int
 tabstop = 4
 
 parensized :: (Pretty a) => [a] -> Doc
@@ -30,6 +33,11 @@ identifier = cyan    . pretty
 comment    = blue    . pretty
 operator   = magenta . pretty
 
+prettify :: (Pretty a) => a -> String
+prettify = show . pretty
+
+dullify :: (Pretty a) => a -> String
+dullify x = (displayS . renderCompact . pretty $ x) ""--FIXME
 
 {-
 instance Monoid Doc where

@@ -1,8 +1,6 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, OverlappingInstances #-}
 module Language.SPL.Data.Program where
 
-import Language.SPL.Data.Position
-
 import Language.SPL.Printer
 
 
@@ -22,7 +20,8 @@ data Type = VOID
           | LIST Type
           | POLY String
           deriving (Show, Eq, Ord)
-data Name = Main
+data Name = Globals
+          | Main
           | Print
           | IsEmpty
           | Head
@@ -30,7 +29,8 @@ data Name = Main
           | Fst
           | Snd
           | Name String
-          deriving (Eq, Ord)
+          | Temp String
+          deriving (Show, Eq, Ord)
 
 type Parameters = [Parameter]
 data Parameter  = Parameter Type Name
@@ -67,22 +67,26 @@ data UnaryOperator  = Not | Neg
 
 type Arrity      = Int
 type Signature   = [Type]
+--data Procedure   = Procedure Name Arrity [Name] Statements
+                 --deriving (Show, Eq, Ord)
+--type Procedures  = [Procedure]
 
 isDefinition :: Construct -> Bool
-isDefinition (Definition _ _ _ _ _) = True
-isDefinition _                      = False
+isDefinition Definition {} = True
+isDefinition _             = False
 
 isDeclaration :: Construct -> Bool
-isDeclaration (Declaration _ _ _) = True
-isDeclaration _                   = False
+isDeclaration Declaration {} = True
+isDeclaration _              = False
 
 isMain :: Construct -> Bool
 isMain (Definition _ Main _ _ _) = True
 isMain _                         = False
 
 -- Manual Show -----------------------------------------------------------------
-
+{-
 instance Show Name where
+  show Globals  = "_globals"
   show Main     = "main"
   show Print    = "print"
   show IsEmpty  = "isEmpty"
@@ -91,7 +95,8 @@ instance Show Name where
   show Fst      = "fst"
   show Snd      = "snd"
   show (Name s) = s
-
+  show (Temp s) = '_' : s
+-}
 -- Pretty Printer --------------------------------------------------------------
 
 instance Pretty Program where
@@ -113,14 +118,17 @@ instance Pretty Type where
   pretty (POLY s)   = annotation s
 
 instance Pretty Name where
+  --pretty = identifier . show--TODO
+  pretty Globals  = identifier "_globals"
+  pretty Main     = identifier "main"
   pretty Print    = identifier "print"
   pretty IsEmpty  = identifier "isEmpty"
   pretty Head     = identifier "head"
   pretty Tail     = identifier "tail"
   pretty Fst      = identifier "fst"
   pretty Snd      = identifier "snd"
-  pretty Main     = identifier "main"
   pretty (Name s) = identifier s
+  pretty (Temp s) = identifier $ '_' : s
 
 instance Pretty Parameters where
   pretty = parensized
@@ -152,7 +160,7 @@ instance Pretty Expression where
   pretty (List)        = constant "[]"
   pretty (Pair x y)    = parensized [x,y]
   pretty (Call n as)   = pretty n <> pretty as
-  pretty (Infix o l r) = parens . align $ pretty l <+> pretty o </> pretty r
+  pretty (Infix o l r) = parens . align $ pretty l <+> pretty o <+> pretty r
   pretty (Prefix o e)  = parens $ pretty o <> pretty e
 
 instance Pretty BinaryOperator where
@@ -175,3 +183,7 @@ instance Pretty UnaryOperator where
   pretty Not = operator '!'
   pretty Neg = operator '-'
 
+--instance Pretty Procedure where
+  --pretty (Procedure n _ ps ss) = empty <$>
+                                 --pretty n <+> pretty ps <+>
+                                 --block (pretty ss)

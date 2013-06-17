@@ -36,9 +36,11 @@ builtins = return $ Map.fromList types
                   , (Main,    Function VOID 0 [])
                   ]
 
+-- toplevel ?
 globals :: Program -> Reporter Environment
 globals p = Map.union <$> builtins <*> create p
 
+-- information ?
 locals :: Construct -> Reporter Environment
 locals (Declaration _ _ _)       = error "no locals for variable declaration"
 locals (Definition  _ _ ps cs _) = Map.union <$> parameters <*> constructs

@@ -1,14 +1,12 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
 module Language.SPL.Simplifier where
 
-import Language.SPL.Printer (Pretty, pretty)
-import qualified Language.SPL.Printer as Print
-
 import Language.SPL.Data.Program
 
---import Data.Sequence (Seq, (|>), (<|), (><))
+--import Data.Sequence (Seq, (|>), (<|), ><))
 import Data.List
 import Data.Foldable (foldrM)
+import Data.Functor
 
 import Control.Monad.Supply
 
@@ -25,23 +23,33 @@ l |> x = l ++ [x] -- Yes, this is inefficient...
 
 -- Supply Monad ----------------------------------------------------------------
 
-type Temporary = Name
-type Supplier = Supply Temporary
+type Supplier = Supply Name
 
-temporaries = map (\s -> Name $ '_':s) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
+temporaries :: [Name]
+temporaries = map Temp $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
 
 transform :: Program -> Program
 transform p = evalSupply (transform' p) temporaries
 
 transform' :: Program -> Supplier Program
-transform' p = do gs' <- simplify gs
+transform' p = do let (gs,fs) = partition isDeclaration p
+                  (cs,is) <- simplify gs
                   fs' <- mapM simplify fs
-                  return . sort . map (updateMain gs') $ fs'
-               where (gs,fs) = partition isDeclaration p
+                  return $ Definition VOID Globals [] cs is : (sort . map update) fs'
 
-updateMain :: Statements -> Construct -> Construct
-updateMain gs (Definition VOID Main [] [] ss) = Definition VOID Main [] [] (gs ++ ss)
-updateMain _  c                               = c
+update :: Construct -> Construct
+update (Definition t n ps cs ss) = Definition t n ps (cs ++ concatMap temps ss) ss
+
+temps :: Statement -> Constructs
+temps s = case s of
+  Assign (Temp t) _  -> [Declaration VOID (Temp t) (Integer 0)]
+  If     _ ts fs     -> concatMap temps ts ++ concatMap temps fs
+  While  _ ds        -> concatMap temps ds
+  _                  -> []
+
+--updateMain :: Statements -> Construct -> Construct
+--updateMain gs (Definition VOID Main [] [] ss) = Definition VOID Main [] [] (gs ++ ss)
+--updateMain _  c                               = c
 
 -- Simplifiable ----------------------------------------------------------------
 -- * Transform Declarations into ordinary Assign.
@@ -51,56 +59,60 @@ updateMain _  c                               = c
 class Simplifiable a b where
   simplify :: a -> Supplier b
 
-instance (Simplifiable a Statements) => Simplifiable [a] Statements where
-  simplify as = return . concat =<< mapM simplify as
-
 instance Simplifiable Construct Construct where
-  simplify (Definition t n ps cs bs) = simplify bs >>= \bs' ->
-                                       simplify cs >>= \cs' ->
-                                       return $ Definition t n ps [] (cs' ++ bs')
+  simplify (Definition t n ps cs ss) = do (cs',is) <- simplify cs
+                                          ss'      <- simplify ss
+                                          return $ Definition t n ps cs' (is ++ ss')
 
-instance Simplifiable Construct Statements where
-  simplify (Declaration t n e)       = simplify e >>= \(ss,e') ->
-                                       return $ ss |> Assign n e'
+instance Simplifiable Construct (Construct,Statements) where
+  simplify (Declaration t n e)       = do (ss,e') <- simplify e
+                                          let c' = Declaration t n (Integer 0)
+                                          return (c', ss |> Assign n e')
+
+instance Simplifiable Constructs (Constructs,Statements) where
+  simplify cs = do (cs',ss') <- unzip <$> mapM simplify cs
+                   return (cs', concat ss')
 
 instance Simplifiable Statement Statements where
-  simplify (Assign  n (Call m e)) = simplify e  >>= \(ss,e') ->
-                                return $ ss |> Assign n (Call m e')
-  simplify (Assign  n e)      = simplify e  >>= \(ss,e') ->
-                                return $ ss |> Assign n e' 
-  simplify (If      c ts fs)  = simplify c  >>= \(ss,c') ->
-                                simplify ts >>= \ts' ->
-                                simplify fs >>= \fs' ->
-                                return $ ss |> If c' ts' fs'
-  simplify (While   c ds)     = simplify c  >>= \(ss,c') ->
-                                simplify ds >>= \ds' ->
-                                return $ ss |> While c' ds'
-  simplify (Return  Nothing)  = return $ [Return Nothing]
-  simplify (Return  (Just e)) = simplify e  >>= \(ss,e') ->
-                                return $ ss |> Return (Just e')
-  simplify (Execute n as)     = simplify as >>= \(ss,as') ->
-                                return $ ss |> Execute n as'
+  simplify (Assign  n (Call m e)) = do (ss,e') <- simplify e
+                                       return $ ss |> Assign n (Call m e')
+  simplify (Assign  n e)          = do (ss,e') <- simplify e
+                                       return $ ss |> Assign n e'
+  simplify (If      c ts fs)      = do (ss,c') <- simplify c
+                                       ts'     <- simplify ts
+                                       fs'     <- simplify fs
+                                       return $ ss |> If c' ts' fs'
+  simplify (While   c ds)         = do (ss,c') <- simplify c
+                                       ds'     <- simplify ds
+                                       return $ ss |> While c' ds'
+  simplify (Return  Nothing)      = return [Return Nothing]
+  simplify (Return  (Just e))     = do (ss,e') <- simplify e
+                                       return $ ss |> Return (Just e')
+  simplify (Execute n as)         = do (ss,as') <- simplify as
+                                       return $ ss |> Execute n as'
+
+instance Simplifiable Statements Statements where
+  simplify ss = concat <$> mapM simplify ss--FIXME: lift map?
 
 instance Simplifiable Expression (Statements, Expression) where
-  simplify (Pair    a b)   = simplify [a,b] >>= \(ss,[a',b']) ->
-                             return (ss, Pair a' b')
-  simplify (Call    n as)  = simplify as    >>= \(ss,as') ->
-                             supply         >>= \t ->
-                             return (ss |> Assign t (Call n as'), Value t)
-  simplify (Infix   o l r) = simplify [l,r] >>= \(ss,[l',r']) ->
-                             return (ss, Infix o l' r')
-  simplify (Prefix  o e)   = simplify e     >>= \(ss,e') ->
-                             return (ss, Prefix o e')
+  simplify (Pair    a b)   = do (ss,[a',b']) <- simplify [a,b]
+                                return (ss, Pair a' b')
+  simplify (Call    n as)  = do (ss,as') <- simplify as
+                                t <- supply        
+                                return (ss |> Assign t (Call n as'), Value t)
+  simplify (Infix   o l r) = do (ss,[l',r']) <- simplify [l,r]
+                                return (ss, Infix o l' r')
+  simplify (Prefix  o e)   = do (ss,e') <- simplify e
+                                return (ss, Prefix o e')
   simplify e               = return ([], e) -- Value, Integer, Boolean, List
 
 instance Simplifiable Expressions (Statements, Expressions) where
   simplify es = foldrM add ([],[]) =<< mapM simplify es
-
-add :: (Statements,Expression) -> (Statements,Expressions) -> Supply Temporary (Statements,Expressions)
-(ss,e) `add` (ss',es')
-  | e <-> ss' = return (ss >< ss', e <| es')
-  | otherwise = supply >>= \t ->
-                return ((ss |> Assign t e) >< ss', Value t <| es')
+    where add :: (Statements,Expression) -> (Statements,Expressions) -> Supply Name (Statements,Expressions)
+          (ss,e) `add` (ss',es')
+            | e <-> ss' = return (ss >< ss', e <| es')
+            | otherwise = do t <- supply
+                             return ((ss |> Assign t e) >< ss', Value t <| es')
 
 -- Commutable ------------------------------------------------------------------
 -- * Calls do not commute with any statement because of side-effects.
@@ -119,5 +131,5 @@ instance Commutable Statement where
   _           <-> _ = True
 
 instance Commutable Statements where
-  e <-> ss = and $ map (e <->) ss
+  e <-> ss = all (e <->) ss
 
