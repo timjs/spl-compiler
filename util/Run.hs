@@ -2,6 +2,7 @@ module Main where
 
 import Control.Monad
 import System.Environment
+import System.FilePath
 
 import Language.SPL.Parser
 import Language.SPL.Printer
@@ -14,16 +15,18 @@ import Output
 main = do
   as <- getArgs
   when (null as) (error "No arguments given")
-  putAct "Parsing"
-  e <- parseSourceFile (as!!0)
+  let f = head as
+  putAct $ "Parsing " ++ f
+  e <- parseSourceFile f
   case e of
     Right p -> do
       putInf "Parsing succeded"
+      print p
       print $ pretty p
       putAct "Analysing"
       let (b,r) = (analyse p)
-      case b of
-        True  -> do
+      if b
+        then do
           putInf "Analysing succeded"
           putAct "Simplifying"
           let p' = transform p
@@ -31,7 +34,8 @@ main = do
           putAct "Compiling"
           let c = compile p'
           print $ pretty c
-        False -> do
+          writeFile (replaceExtension f ".ssm") (dullify c)
+        else do
           putErr "Analysing failed"
           print $ pretty r
     Left r  -> do
