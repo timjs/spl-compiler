@@ -1,5 +1,6 @@
 .DS_Store
 dist/*
+*.ssm
 
 # TeX helpers
 *.log
@@ -16,6 +17,3 @@ dist/*
 
 # TeX generated
 *.pdf
-
-# Programs
-Utilities/Run

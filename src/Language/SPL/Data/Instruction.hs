@@ -1,19 +1,13 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, ViewPatterns #-}
 module Language.SPL.Data.Instruction where
 
-import Language.SPL.Printer (Pretty,pretty,text,char,vsep,fill,(<>),(<+>))
+import Language.SPL.Printer (Pretty,pretty,text,char,vsep,indent,fill,(<>))
 
 import Prelude hiding (length)
 
 import Data.List ((\\))
-
-import Data.Sequence (Seq,singleton,length,adjust,viewl,viewr,ViewL(..),ViewR(..),(><))
+import Data.Sequence (Seq,singleton,viewl,viewr,ViewL(..),ViewR(..),(><))
 import Data.Foldable (toList)
-
-adjust' :: (a -> a) -> Int -> Seq a -> Seq a
-adjust' f i s
-  | i < 0     = adjust f (length s + i) s
-  | otherwise = adjust f i s
 
 type Comment  = String
 type Label    = String
@@ -46,6 +40,7 @@ data Operation = ADD | SUB | MUL | DIV | MOD | NEG
                | SWP | SWPR | SWPRR
                deriving (Show, Eq)
 
+-- Important lesson: use seperate type for such annotations!
 data Instruction  = Instruction [Label] Operation [Comment]
 type Instructions = Seq Instruction
 
@@ -59,38 +54,38 @@ class Annotatable a where
   (##) :: a -> Comment -> Instructions
 
 instance Annotatable Operation where
-  l # o  = l # instruction o
-  o ## c =     instruction o ## c
+  l # o  = singleton $ Instruction [l] o []
+  o ## c = singleton $ Instruction []  o [c]
 
 instance Annotatable Instruction where
   l # (Instruction ls o cs)  = singleton $ Instruction (l:ls) o cs
   (Instruction ls o cs) ## c = singleton $ Instruction ls o (c:cs)
 
 instance Annotatable Instructions where
-  l # is = case viewl is of
-    EmptyL  -> l # NOP
-    i :< is -> l # i >< is
-  is ## c = case viewr is of
-    EmptyR  -> NOP ## c
-    is :> i -> is >< i ## c
+  l # (viewl -> EmptyL)  = l # NOP
+  l # (viewl -> i :< is) = l # i >< is
+
+  (viewr -> EmptyR)  ## c = NOP ## c
+  (viewr -> is :> i) ## c = is >< i ## c
 
 -- Pretty Printer --------------------------------------------------------------
-
---instance Pretty Instruction where
-  --pretty (l :#  i) = text l <> char ':' <> pretty i
-  --pretty (i :## c) = pretty i <> char ';' <+> text c
-  --pretty i         = text "\t\t" <> text s <> text "\t\t"
-           --where s = show i \\ ['(', ')', '"', '"', '\''] -- For () around -1, "" around labels and ' of LDC'
 
 tabstop :: Int
 tabstop = 16
 
-instance Pretty Instruction where
-  pretty (Instruction [l] o [c]) = fill tabstop (text l <> char ':') <>
-                                   fill tabstop (text s) <>
-                                   char ';' <> text c
-                         where s = show o \\ ['(', ')', '"', '"', '\''] -- For () around -1, "" around labels and ' of LDC'
+instance Pretty Operation where
+  pretty o = text $ show o \\ ['(', ')', '"', '"', '\''] -- For () around -1, "" around labels and ' of LDC'
 
+instance Pretty Instruction where
+  pretty (Instruction []  o [])  = indent tabstop (pretty o)
+  pretty (Instruction [l] o [])  = fill tabstop (text l <> char ':') <>
+                                   pretty o
+  pretty (Instruction []  o [c]) = indent tabstop (fill tabstop (pretty o)) <>
+                                   char ';' <> text c
+  pretty (Instruction [l] o [c]) = fill tabstop (text l <> char ':') <>
+                                   fill tabstop (pretty o) <>
+                                   char ';' <> text c
+  pretty _                       = error "multiple annotations in instruction not implemented"
 
 instance Pretty Instructions where
   pretty = vsep . map pretty . toList
