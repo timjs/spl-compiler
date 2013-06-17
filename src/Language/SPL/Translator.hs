@@ -19,55 +19,75 @@ import Data.Sequence (Seq,empty,singleton,(<|),(><),(|>))
 import Control.Monad.Reader
 import Control.Monad.Supply
 
--- Supplier Monad --------------------------------------------------------------
--- The Supplier monad is a Reader of Location from a Display
+import Debug.Trace
+
+traceM :: (Show a, Monad m) => String -> a -> m a
+traceM s x = trace (s ++ show x) (return x)
+
+traceS :: (Show a) => String -> a -> a
+traceS s x = trace (s ++ show x) x
+
+-- Locator Monad --------------------------------------------------------------
+-- The Locator monad is a Reader of Location from a Display
 -- and a Supply of Labels
 
-type Supplier = ReaderT Display (Supply Label)
+type Locator = ReaderT Display (Supply Label)
 
-evalSupplier :: Supplier a -> [Label] -> Display -> a
+evalSupplier :: Locator a -> [Label] -> Display -> a
 evalSupplier a ls d = evalSupply (runReaderT a d) ls --TODO
 
 -- Translatable ----------------------------------------------------------------
 
-temporaries = map (\s -> '_':s) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
+labels = map (\s -> '_':s) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
 
 compile :: Program -> Instructions
-compile p = evalSupplier (translate p) temporaries Map.empty
+compile p = evalSupplier (translate p) labels (traceS "** globals: " (makeDisplay $ head p))
 
 class Translatable a where
-  translate :: a -> Supplier (Seq Instruction)
+  translate :: a -> Locator (Seq Instruction)
 
 instance (Translatable a) => Translatable [a] where
+  translate [] = return empty
   translate xs = return . foldr1 (><) =<< mapM translate xs
 
 instance Translatable Construct where
   translate c = case c of
     -- Variables declarations are easy
-    Declaration _ n _          ->    return $ singleton (LDC 0 ## ("Initialize " ++ show n))
-    -- Function definitions more complicated
+    Declaration _ n _          ->    return $ singleton (LDC 0 ## ("Initialize " ++ dullify n))
+    -- Function definitions are more complicated
     Definition _ Globals [] cs ss -> do cs' <- translate cs
-                                        ss' <- translate ss
-                                        return $ cs' ><
-                                                 ss'
+                                        globals <- ask
+                                        traceM "** locals for _globals: " $ makeDisplay c `Map.union` globals
+                                        ss' <- local (makeDisplay c `Map.union`) $ translate ss--FIXME: use \/ ?
+                                        return $ dullify Globals # LDR SP ## "Load current stack pointer..."       <|
+                                                                   STR GP ## "...and save it to reference globals" <|
+                                                                   cs'                                             ><
+                                                                   ss'
     Definition _ Main [] cs ss    -> do cs' <- translate cs
-                                        ss' <- translate ss
-                                        return $ cs'                      ><
-                                                 ss'                      ><
-                                                 TRAP 0 ## "Print result" <|
-                                                 singleton (HALT   ## "Halt machine") --TODO
+                                        globals <- ask
+                                        traceM "** locals for main: " $ makeDisplay c `Map.union` globals
+                                        ss' <- local (makeDisplay c `Map.union`) $ translate ss--FIXME: use \/ ?
+                                        return $ dullify Main # LDR SP           ## "Load current stack pointer..."            <|
+                                                                STR MP           ## "...and mark this as a new local function" <|
+                                                                cs'                                                            ><
+                                                                ss'                                                            ><
+                                                                TRAP 0           ## "Print result"                             <|
+                                                                singleton (HALT) ## "Halt machine"
     Definition _ n ps cs ss        -> do cs' <- translate cs
-                                         ss' <- translate ss
+                                         globals <- ask
+                                         traceM ("** locals for " ++ show n) $ makeDisplay c `Map.union` globals
+                                         ss' <- local (makeDisplay c `Map.union`) $ translate ss--FIXME: use \/ ?
                                          return $ dullify n # LDR MP     <|
                                                               LDRR MP SP <|
-                                                  ss'
+                                                              ss'
 
 instance Translatable Statement where
   translate s = case s of
     Assign n e      -> do e' <- translate e
                           l  <- location n
-                          case l of Local  i -> return $ e'           |> STL i ## dullify s
-                                    Global i -> return $ e' |> LDR GP |> STA i ## dullify s
+                          case l of
+                            Local  i -> return $ e'           |> STL i ## dullify s
+                            Global i -> return $ e' |> LDR GP |> STA i ## dullify s
     If c ts fs      -> do t <- supply
                           let [ifLabel,thenLabel,elseLabel,fiLabel] = map (\l -> "_" ++ l ++ t) ["if","then","else","fi"]
                           c'  <- translate c
@@ -136,7 +156,7 @@ instance Translatable BinaryOperator where
   translate o = fromJust . Map.lookup o $ operators
   --translate = return . singleton . fromEnum . toEnum
 
-operators :: Map BinaryOperator (Supplier (Seq Instruction))
+operators :: Map BinaryOperator (Locator (Seq Instruction))
 operators = Map.fromList $ zip bs is
  where is = map (return . singleton) [ADD, SUB, MUL, DIV, MOD, EQ, NE, LT, GT, LE, GE, AND, OR]
        bs =                          [Add, Sub, Mul, Div, Mod, Eq, Ne, Lt, Gt, Le, Ge, And, Or]

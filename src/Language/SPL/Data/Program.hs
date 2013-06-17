@@ -12,6 +12,9 @@ type Constructs = [Construct]
 data Construct = Declaration Type Name Expression
                | Definition  Type Name Parameters Constructs Statements
                deriving (Show, Eq, Ord)
+-- For our convenience
+type Declaration = Construct
+type Definition  = Construct
 
 data Type = VOID
           | INT
@@ -70,6 +73,14 @@ type Signature   = [Type]
 --data Procedure   = Procedure Name Arrity [Name] Statements
                  --deriving (Show, Eq, Ord)
 --type Procedures  = [Procedure]
+
+class HasName a where
+  name :: a -> Name
+instance HasName Construct where
+  name (Declaration _ n _)    = n
+  name (Definition _ n _ _ _) = n
+instance HasName Parameter where
+  name (Parameter _ n) = n
 
 isDefinition :: Construct -> Bool
 isDefinition Definition {} = True

@@ -77,7 +77,7 @@ instance Checkable Construct where
   check d@(Definition  t n _ cs bs) = do
     let (ls,es) = runReporter $ locals d
     tell es
-    local (`Map.union` ls) (bs =~ t <&> check cs <&> check bs)
+    local (ls `Map.union`) (bs =~ t <&> check cs <&> check bs)
       --ask >>= \e -> debug (Print.text "* Locals for" <+> pretty n </> pretty e)
 
 {- Statements -

@@ -8,7 +8,7 @@ import Prelude hiding (null)
 import Data.List ((\\))
 
 import qualified Data.Sequence as Seq
-import Data.Sequence (Seq,singleton,null,(<|),(><),(|>))
+import Data.Sequence (Seq,singleton,null)
 import Data.Foldable (toList)
 
 adjust' :: (a -> a) -> Int -> Seq a -> Seq a
