@@ -42,7 +42,7 @@ update (Definition t n ps cs ss) = Definition t n ps (cs ++ concatMap temps ss) 
 
 temps :: Statement -> Constructs
 temps s = case s of
-  Assign (Temp t) _  -> [Declaration VOID (Temp t) (Integer 0)]
+  Assign (Temp t) _  -> [Declaration (POLY "t") (Temp t) (Integer 0)]--FIXME: type?
   If     _ ts fs     -> concatMap temps ts ++ concatMap temps fs
   While  _ ds        -> concatMap temps ds
   _                  -> []
