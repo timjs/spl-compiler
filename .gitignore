@@ -17,6 +17,3 @@ dist/*
 
 # TeX generated
 *.pdf
-
-# Programs
-Utilities/Run
