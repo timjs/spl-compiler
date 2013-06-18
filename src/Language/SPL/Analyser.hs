@@ -5,19 +5,14 @@ import Language.SPL.Data.Program
 import Language.SPL.Data.Position
 import Language.SPL.Data.Environment
 import Language.SPL.Data.Error
-import Language.SPL.Printer (pretty, (<+>), (</>))
-import qualified Language.SPL.Printer as Print
 
 import Control.Applicative
 
 import Control.Monad.Reader
 import Control.Monad.Writer
 
-import qualified Data.MultiMap as Multi
 import qualified Data.Map as Map
 --import qualified Data.Map.Extensions as Map
-
-import Debug.Trace
 
 infixl 5 =~, /~
 infix  0 <?>
@@ -74,7 +69,7 @@ instance (Checkable a) => Checkable [a] where
  -}
 instance Checkable Construct where
   check   (Declaration t _ e)       = e =~ t
-  check d@(Definition  t n _ cs bs) = do
+  check d@(Definition  t _ _ cs bs) = do
     let (ls,es) = runReporter $ locals d
     tell es
     local (ls `Map.union`) (bs =~ t <&> check cs <&> check bs)
@@ -92,6 +87,31 @@ instance Checkable Statement where
   check (While c ls)   = c =~ BOOL <&> check ls
   check (Execute n as) = checkFun n VOID (length as) as =<< info n
     --info n >>= \i -> debug (Print.text "exe =>" <+> pretty n <> Print.text ": " <> pretty i) (checkFun n VOID (length as) as i)
+  check (Match n cs)   = checkMch n cs =<< info n
+
+checkVar :: Name -> Type -> Maybe Info -> Analyser Bool
+checkVar n t (Just (Variable t'))    = t =~ t' <?> report p (TypeMismatch t n t')
+checkVar n _ (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
+checkVar n _ (Nothing)               = report p (VariableNotInScope n)
+
+checkFun :: Name -> Type -> Arrity -> Arguments -> Maybe Info -> Analyser Bool
+checkFun n _ _ _  (Just (Variable _)) = report p (VariableUsedAsFunction n)
+checkFun n t a as (Just (Function t' a' ps))
+  = (return (a == a') <?> report p (ArrityMismatch a n a')) <&>
+    (t =~ t' <?> report p (ReturnMismatch t n t')) <&>
+    (and <$> zipWithM (=~) as ps)
+checkFun n _ _ _ (Nothing) = report p (FunctionNotInScope n)
+--(VOID =~ t' <?> report p (UnusedReturnValue n t')) <&>
+
+checkAss :: Name -> Expression -> Maybe Info -> Analyser Bool
+checkAss _ e (Just (Variable t))     = e =~ t
+checkAss n _ (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
+checkAss n _ (Nothing)               = report p (VariableNotDeclared n)
+
+checkMch :: Name -> Cases -> Maybe Info -> Analyser Bool
+checkMch _ cs (Just (Variable t))     = cs =~ t
+checkMch n _  (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
+checkMch n _  (Nothing)               = report p (VariableNotDeclared n)
 
 -- Matchable -------------------------------------------------------------------
 
@@ -104,27 +124,31 @@ class Matchable a where
   a =~ t = not <$> a /~ t
   a /~ t = not <$> a =~ t
 
-{- Blocks and Arguments -
+{- Statements and Arguments -
  -
- - Blocks certain =~ a type if all the Return statments
+ - Statements match a certain type if all the Return statments
  - evaluate to the same type.
- - Arguments ceratain =~ a type if each argument
+ - Arguments match a certain type if each argument
  - (which is an expression) matches the give type.
  -}
 instance (Matchable a) => Matchable [a] where
   a =~ t = liftM and $ mapM (=~ t) a
 
-{- Statements -
+{- Statement -
  -
  - Statement matches are only used to ensure the types of the Return statements.
- - We go on recursively checking the Blocks of If and While statements.
+ - We go on recursively checking the Statements of If, While and Match statements.
  -}
 instance Matchable Statement where
   Return Nothing  =~ VOID = return True
   Return (Just e) =~ t    = e  =~ t
   If     _ ts es  =~ t    = ts =~ t <&> es =~ t
   While  _ ls     =~ t    = ls =~ t
+  Match  _ cs     =~ t    = cs =~ t
   _               =~ _    = return True
+
+instance Matchable Case where
+  Case _ ss =~ t = ss =~ t
 
 instance Matchable Expression where
   Boolean _      =~ BOOL     = return True
@@ -157,24 +181,6 @@ instance Matchable Type where
 
 
 
-checkVar :: Name -> Type -> Maybe Info -> Analyser Bool
-checkVar n t (Just (Variable t'))    = t =~ t' <?> report p (TypeMismatch t n t')
-checkVar n _ (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
-checkVar n _ (Nothing)               = report p (VariableNotInScope n)
-
-checkFun :: Name -> Type -> Arrity -> Arguments -> Maybe Info -> Analyser Bool
-checkFun n _ _ _  (Just (Variable _)) = report p (VariableUsedAsFunction n)
-checkFun n t a as (Just (Function t' a' ps))
-  = (return (a == a') <?> report p (ArrityMismatch a n a')) <&>
-    (t =~ t' <?> report p (ReturnMismatch t n t')) <&>
-    (and <$> zipWithM (=~) as ps)
-checkFun n _ _ _ (Nothing) = report p (FunctionNotInScope n)
---(VOID =~ t' <?> report p (UnusedReturnValue n t')) <&>
-
-checkAss :: Name -> Expression -> Maybe Info -> Analyser Bool
-checkAss _ e (Just (Variable t))     = e =~ t
-checkAss n _ (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
-checkAss n _ (Nothing)               = report p (VariableNotDeclared n)
 
 
 

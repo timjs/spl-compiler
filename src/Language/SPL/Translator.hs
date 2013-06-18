@@ -72,7 +72,6 @@ instance Translatable Construct where
                                                                 STR MP ## "...and mark this as a new local function" ><
                                                                 cs'                                                  ><
                                                                 ss'                                                  ><
-                                                                TRAP 0 ## "Print result"                             ><
                                                                 HALT   ## "Halt machine"
     Definition _ n _ cs ss        -> do cs' <- translate cs
                                         globals <- ask

@@ -1,0 +1,26 @@
+Int test ([Int] list)
+{
+    match list
+    case ([])
+        return 0;
+    case (1:[])
+    	return 1;
+    case (1:2:[])
+        return 2;
+    case (1:2:3:xs)
+    	return 4;
+    case (_)
+    	return 8;
+}
+
+Void main () {
+	print(matcher([]));
+	print(matcher(1:[]));
+	print(matcher(1:2:[]));
+	print(matcher(1:2:3:[]));
+	print(matcher(1:2:3:4:[]));
+	print(matcher(4:3:2:1:[]));
+}
+
+// vim: ft=c syn=spl
+

@@ -772,7 +772,10 @@ Source files: \type{Language/SPL/Translator.hs}, \type{Language/SPL/Instruction.
   {}
   \startgrammar
   \NC Statement \TQ \dots
-                \OQ \Match\ @(@ Expression @)@ (\Case\ @(@ Expression @)@ Block)\+ \NR
+                \OQ \Match\ @(@ Name @)@ (\Case\ @(@ Expression @)@ Block)\+ \NR
+  \NC Pattern   \TQ \True\ \| \False\ \| Decimal
+                \OQ @[]@  \| Pattern @:@ Pattern
+                \OQ Name \| @(@ Pattern @,@ Pattern @)@ \NR
   \stopgrammar
 
 \chapter[chp:remarks]{Remarks}

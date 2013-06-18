@@ -1,0 +1,12 @@
+Int matcher (Bool boolean) {
+	match boolean
+	case (True)
+		return 1;
+	case (False)
+		return 0;
+}
+
+Void main () {
+	print(matcher(True));
+	print(matcher(False));
+}

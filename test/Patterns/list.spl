@@ -1,0 +1,12 @@
+// Calculate the sum of a list of integers
+Int sum ([Int] list)
+{
+    match list
+    case ([])
+        return 0;
+    case (x:xs)
+        return x + sum(xs);
+}
+
+// vim: ft=c syn=spl
+

@@ -75,7 +75,7 @@ statement, action :: Parser Statement
 statement =   If      <$> (reserved "if" *> parens expression) <*> (block)
                       <*> (option [] (reserved "else" *> block))
           <|> While   <$> (reserved "while" *> parens expression) <*> (block)
-          <|> Match   <$> (reserved "match" *> parens expression) <*> many cas
+          <|> Match   <$> (reserved "match" *> identifier) <*> many cas
           <|> Return  <$> (reserved "return" *> optional expression <* semi)
           <|> action
           <?> "statement"
@@ -83,8 +83,27 @@ action    =   identifier >>= \id ->
               Execute id <$> (parensized arguments <* semi)
           <|> Assign  id <$> (equal *> expression <* semi)
           <?> "action"
+
 cas :: Parser Case
-cas       = Case <$> (reserved "case" *> parens expression) <*> block
+cas     = Case <$> (reserved "case" *> parens pattern) <*> block
+pattern, patternCons :: Parser Pattern
+pattern = patternCons `chainr1` patternOper
+patternCons =   Anything          <$  symbol "_"
+            <|> ListPattern       <$  symbol "[]"
+            <|> BoolPattern True  <$  reserved "True"
+            <|> BoolPattern False <$  reserved "False"
+            <|> IntPattern        <$> decimal
+            <|> PairPattern       <$> (paren *> pattern) <*> (comma *> pattern <* paren)
+            <|> NamePattern       <$> identifier
+            <?> "pattern"
+patternOper :: Parser (Pattern -> Pattern -> Pattern)
+patternOper = ConsPattern <$ symbol ":"
+--patternOper = symbol ":" >> return ConsPattern
+            -- empty
+            -- <|> ConsPattern x <$> (symbol ":" *> pattern)
+--named   =   identifier >>= \id ->
+            --ConsPattern (NamePattern id) <$> (symbol ":" *> pattern)
+        -- <|> pure (NamePattern id)
 
 expression, term, group, call :: Parser Expression
 expression = expressionBuilder term

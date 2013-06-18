@@ -1,0 +1,21 @@
+Int matcher ((Int,Bool) pair)
+{
+    match pair
+    case ((0,True))
+        return 0;
+    case ((0,False))
+    	return -1;
+    case ((1,True))
+    	return 1;
+    case ((1,False))
+    	return 0;
+}
+
+Void main () {
+	print(matcher(0,True));
+	print(matcher(1,False));
+	print(matcher(2,False));
+}
+
+// vim: ft=c syn=spl
+

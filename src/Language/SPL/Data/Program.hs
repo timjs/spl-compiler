@@ -43,13 +43,9 @@ type Statements = [Statement]
 data Statement  = Assign  Name Expression
                 | If      Expression Statements Statements
                 | While   Expression Statements
-                | Match   Expression Cases
+                | Match   Name Cases
                 | Return  (Maybe Expression)
                 | Execute Name Arguments
-                deriving (Show, Eq, Ord)
-
-type Cases      = [Case]
-data Case       = Case Expression Statements
                 deriving (Show, Eq, Ord)
 
 type Expressions = [Expression]
@@ -62,6 +58,18 @@ data Expression  = Value    Name
                  | Infix    BinaryOperator Expression Expression
                  | Prefix   UnaryOperator Expression
                  deriving (Show, Eq, Ord)
+
+type Cases   = [Case]
+data Case    = Case Pattern Statements
+             deriving (Show, Eq, Ord)
+data Pattern = Anything
+             | NamePattern Name
+             | ListPattern
+             | ConsPattern Pattern Pattern
+             | PairPattern Pattern Pattern
+             | IntPattern  Integer
+             | BoolPattern Bool
+             deriving (Show, Eq, Ord)
 
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
@@ -147,7 +155,7 @@ instance Pretty Statement where
                    block e
     While c l   -> keyword "while" <+> parens (pretty c) <+>
                    block l
-    Match e cs  -> keyword "match" <+> parens (pretty e) <$>
+    Match n cs  -> keyword "match" <+> pretty n <$>
                    pretty cs
 
 instance Pretty Case where
@@ -156,6 +164,16 @@ instance Pretty Case where
 
 instance Pretty Cases where
   pretty = vsep . map pretty
+
+instance Pretty Pattern where
+  pretty p = case p of
+    Anything        -> constant '_'
+    NamePattern n   -> identifier n
+    ListPattern     -> constant "[]"
+    ConsPattern l r -> pretty l <> operator ':' <> pretty r --TODO: parens ?
+    PairPattern l r -> parensized [l,r]
+    IntPattern  i   -> constant i
+    BoolPattern b   -> constant b
 
 instance Pretty Expression where
   pretty e = case e of
