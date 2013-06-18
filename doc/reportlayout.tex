@@ -1,48 +1,14 @@
 \startenvironment reportlayout
-\environment      documentdefinitions
+%\enablemode[doublesided]
+\environment documentlayout
 
 \setupbodyfont[lucida,10pt]
-\setupcapitals
-  [sc=yes]
 
-\setuppapersize[A4][A4]
-\setuplayout
-  [width=middle,
-   backspace=6pc,
-   cutspace=10pc,
-   margin=6pc,
-   height=middle,
-   header=0pc,
-   topspace=6pc,
-   footer=4pc,
-   bottomspace=6pc]
-\setuppagenumbering
-  [alternative=doublesided,
-   location={footer,right}]
-
-%\setupnote[footnote]
-  %[numbercommand=]% We don't want subscripts at the bottom of the page.
-%\setupnotation[footnote]
-  %[alternative=left,
-   %distance=0.5em]
-
-%\setupindenting[yes,medium]
+\setupindenting[no]
 \setupwhitespace[medium]
-\setupblank[big]
-\setupitemgroup[itemize][each]
-  [packed]
-  [headstyle=\ss\bf,
-   indentnext=auto]
 
 \setuphead[chapter]
-  [style=\ss\bfc,
-   page=yes]
-\setuphead[section]
-  [style=\ss\bfb]
-   %before=\blank,
-   %after=\blank]
-\setuphead[subsection]
-  [style=\ss\bfa]
+  [page=yes]
 
 \setupformulas
   [align=right,
@@ -50,19 +16,6 @@
    spacebefore=big,
    spaceafter=big,
    indentnext=auto]
-
-\setupcaption[table]
-  [location=top]
-\setuptabulate
-  [rulethickness=1pt]
-
-\setupbibtex
-  [database=literature,
-   sort=author]
-\setuppublications
-  [alternative=apa,
-   sort=bbl,
-   criterium=text]
 
 \usemodule[vim]
 \setupvimtyping
@@ -74,10 +27,190 @@
    before=\blank,
    after=\blank,
    indentnext=auto,
-   directory=buffers,
+   directory=buffers,% DON'T FORGET TO CREATE THIS DIRECTORY!!!
    alternative=blackandwhite]
 \definevimtyping[SPL]
   [syntax=spl]
+
+\setupbibtex
+  [database=literature]
+  
+\setupbodyfontenvironment[default]
+  [em=italic]
+
+\definefloat[rule][rules]
+\setupfloat[rule]
+  [location=left,
+   default=force,
+   leftmargin=2em,
+   indentnext=auto]
+\setupcaption[rule]
+  [location=right,
+   number=no,
+   style=\ss]
+
+\let\leadsto\implies
+\define\SPL  {{\sc spl}}
+\define\SSM  {{\sc ssm}}
+\define\Stm  {{\math{\mathcal{S}}}}
+\define\Exp  {{\math{\mathcal{E}}}}
+\define\Op   {{\math{\mathcal{O}}}}
+\define\Stms {{\math{\mathcal{S}^+}}}
+\define\Exps {{\math{\mathcal{E}^+}}}
+
+\definemathcommand[bigbowtie][limop]{\bowtie\:}
+
+\define[1]\definelabel
+  {\setvalue{#1}{\text{\ss\tf #1}}}
+\definelabel{Int}
+\definelabel{Bool}
+\definelabel{Void}
+\definelabel{PC}
+\definelabel{SP}
+\definelabel{MP}
+\definelabel{RR}
+\definelabel{GP}
+\definelabel{ifLabel}
+\definelabel{thenLabel}
+\definelabel{elseLabel}
+\definelabel{fiLabel}
+\definelabel{whileLabel}
+\definelabel{doLabel}
+\definelabel{odLabel}
+
+\define[2]\definekeyword
+  {\setvalue{#1}{\text{\tt\bf #2}}}
+\definekeyword{Return}{return}
+\definekeyword{If}{if}
+\definekeyword{Else}{else}
+\definekeyword{While}{while}
+\definekeyword{True}{True}
+\definekeyword{False}{False}
+\definekeyword{VOID}{Void}
+\definekeyword{INT}{Int}
+\definekeyword{BOOL}{Bool}
+\definekeyword{Print}{print}
+\definekeyword{IsEmpty}{isEmpty}
+\definekeyword{Head}{head}
+\definekeyword{Tail}{tail}
+\definekeyword{Fst}{fst}
+\definekeyword{Snd}{snd}
+\definekeyword{Main}{main}
+
+\define[2]\defineoperator
+  {\setvalue{#1}{\text{\tt\tf #2}}}
+\defineoperator{Add}{+}
+\defineoperator{Sub}{-}
+\defineoperator{Mul}{*}
+\defineoperator{Div}{/}
+\defineoperator{Mod}{\%}
+\defineoperator{Eq}{==}
+\defineoperator{Ne}{!=}
+\defineoperator{Lt}{<}
+\defineoperator{Gt}{>}
+\defineoperator{Le}{<=}
+\defineoperator{Ge}{>=}
+\defineoperator{And}{&&}
+\defineoperator{Or}{||}
+\defineoperator{Cons}{:}
+\defineoperator{Not}{!}
+\defineoperator{Neg}{-}
+
+\define[1]\defineinstruction
+  {\setvalue{#1}{\text{\tt\tf #1}}}
+\defineinstruction{ADD}
+\defineinstruction{SUB}
+\defineinstruction{MUL}
+\defineinstruction{DIV}
+\defineinstruction{MOD}
+\defineinstruction{NEG}
+\defineinstruction{AND}
+\defineinstruction{OR}
+\defineinstruction{XOR}
+\defineinstruction{NOT}
+\defineinstruction{EQ}
+\defineinstruction{NE}
+\defineinstruction{GT}
+\defineinstruction{LT}
+\defineinstruction{GE}
+\defineinstruction{LE}
+\defineinstruction{LDC}
+\defineinstruction{LDS}
+\defineinstruction{LDL}
+\defineinstruction{LDA}
+\defineinstruction{LDR}
+\defineinstruction{LDH}
+\defineinstruction{STS}
+\defineinstruction{STL}
+\defineinstruction{STA}
+\defineinstruction{STR}
+\defineinstruction{STH}
+\defineinstruction{LDMS}
+\defineinstruction{LDML}
+\defineinstruction{LDMA}
+\defineinstruction{LDMH}
+\defineinstruction{STMS}
+\defineinstruction{STML}
+\defineinstruction{STMA}
+\defineinstruction{STMH}
+\defineinstruction{BRA}
+\defineinstruction{BRT}
+\defineinstruction{BRF}
+\defineinstruction{AJS}
+\defineinstruction{NOP}
+\defineinstruction{HALT}
+\defineinstruction{TRAP}
+\defineinstruction{JSR}
+\defineinstruction{BSR}
+\defineinstruction{RET}
+\defineinstruction{ANNOTE}
+\defineinstruction{LDAA}
+\defineinstruction{LDRR}
+\defineinstruction{LDLA}
+\defineinstruction{LDSA}
+\defineinstruction{LINK}
+\defineinstruction{UNLINK}
+\defineinstruction{SWP}
+\defineinstruction{SWPR}
+\defineinstruction{SWPRR}
+
+\definetabulate[grammar][|lI|cM|lI|]
+\define\TQ{\NC \to \NC}
+\define\OQ{\NR\NC\NC \mid \NC}
+
+\makecharacteractive @ %@
+\def@#1@{{\tt\tf #1}}
+
+\def\startderivationformula#1\NL#2\stopderivationformula
+  {\starttabulate[|cM|]
+   \NC #1 \NR
+   \HL
+   \NC #2 \NR
+   \stoptabulate}
+\def\startextendedderivationformula#1\NL#2\LR#3\stopextendedderivationformula
+  {\starttabulate[|cM|]
+   \NC #1 \NR
+   \HL
+   \NC #2 \NR
+   \NC #3 \NR
+   \stoptabulate}
+%\starttexdefinition startderivationformula
+%  \start
+%    \define\NL{\NR\HL\NC}
+%    \starttabulate[|cM|]
+%      \NC
+%\stoptexdefinition
+%\starttexdefinition stopderivationformula
+%      \NR
+%    \stoptabulate
+%  \stop
+%\stoptexdefinition
+%\define\startderivationformula
+  %{\starttabulate[|cM|] \NC}
+%\define\stopderivationformula
+  %{\NR \stoptabulate}
+%\define\NL
+  %{\NR\HL\NC}
 
 \stopenvironment
 
