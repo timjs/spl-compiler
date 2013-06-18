@@ -39,7 +39,7 @@ evalSupplier a ls d = evalSupply (runReaderT a d) ls --TODO
 -- Translatable ----------------------------------------------------------------
 
 labels :: [String]
-labels = map (\s -> '_':s) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
+labels = map ('_':) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
 
 compile :: Program -> Instructions
 compile p = evalSupplier (translate p) labels (traceS "** globals: " (makeDisplay $ head p))
@@ -54,7 +54,7 @@ instance (Translatable a) => Translatable [a] where
 instance Translatable Construct where
   translate c = case c of
     -- Variables declarations are easy
-    Declaration _ n _          ->    return $ LDC 0 ## ("Initialize " ++ dullify n)
+    Declaration _ n _             -> return $ LDC 0 ## ("Initialize " ++ dullify n)
     -- Function definitions are more complicated
     Definition _ Globals [] cs ss -> do cs' <- translate cs
                                         globals <- ask
