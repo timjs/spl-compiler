@@ -1,19 +1,8 @@
 .DS_Store
+
 dist/*
+doc/*
+!doc/*.tex
+!doc/*.bib
+
 *.ssm
-
-# TeX helpers
-*.log
-*.tuc
-*.toc
-*.aux
-*.bbl
-*.blg
-*.nav
-*.out
-*.snm
-*.vrb
-*.vimout
-
-# TeX generated
-*.pdf
