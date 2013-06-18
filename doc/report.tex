@@ -48,31 +48,31 @@ Apart from some name changes, there are some other small differences from the or
   \startgrammar
   \NC Program     \TQ Construct\+ \NR
   \NC Construct   \TQ Declaration
-                \OQ Definition \NR
+                  \OQ Definition \NR
   \NC Declaration \TQ Type Name @=@ Expression @;@ \NR
   \NC Definition  \TQ Type Name @(@ Parameters\? @)@
     @\{@ Declaration\* Statement\+ @\}@ \NR
   \NC Type        \TQ \VOID\ \| \INT\ \| \BOOL\
-                \OQ @(@ Type @,@ Type @)@
-                \OQ @[@ Type @]@
-                \OQ Name \NR
+                  \OQ @(@ Type @,@ Type @)@
+                  \OQ @[@ Type @]@
+                  \OQ Name \NR
   \NC Parameters  \TQ Type Name (@,@ Parameters)\? \NR
   \NC Arguments   \TQ Expression (@,@ Arguments)\? \NR
   \NC Block       \TQ @\{@ Statement\* @\}@
-                \OQ Statement \NR
+                  \OQ Statement \NR
   \NC Statement   \TQ \If\ @(@ Expression @)@ Block (\Else\ Block)\?
-                \OQ \While\ @(@ Expression @)@ Block
-                \OQ \Return\ Expression\? @;@
-                \OQ Name @=@ Expression @;@
-                \OQ Call @;@ \NR
+                  \OQ \While\ @(@ Expression @)@ Block
+                  \OQ \Return\ Expression\? @;@
+                  \OQ Name @=@ Expression @;@
+                  \OQ Call @;@ \NR
   \NC Call        \TQ Name @(@ Arguments\? @)@ \NR
   \NC Expression  \TQ \True\ \| \False\ \| Decimal \| @[]@ \| @(@ Expression @,@ Expression @)@
-                \OQ Name \| Call
-                \OQ Expression Binary Expression \| Unary Expression
-                \OQ @(@ Expression @)@ \NR
+                  \OQ Name \| Call
+                  \OQ Expression Binary Expression \| Unary Expression
+                  \OQ @(@ Expression @)@ \NR
   \NC Binary      \TQ \Add\ \| \Sub\ \| \Mul\ \| \Div\ \| \Mod\
-                \OQ \Eq\ \| \Ne\ \| \Lt\ \| \Gt\ \| \Le\ \| \Ge\
-                \OQ \And\ \| \Or\ \| \Cons\ \NR
+                  \OQ \Eq\ \| \Ne\ \| \Lt\ \| \Gt\ \| \Le\ \| \Ge\
+                  \OQ \And\ \| \Or\ \| \Cons\ \NR
   \NC Unary       \TQ \Not\ \| \Neg\ \NR
   \stopgrammar
 
@@ -763,6 +763,17 @@ Translation of operators is a trivial mapping from the \SPL\ operator to its cor
 Once again the implementation is almost a direct translation of the math given in this chapter. Labels are generated fresh by the \type{Supply} monad. Checking for local of global variables is done through asking the \type{Reader} monad. She reads from a \emph{display} which contains this information.
 
 Source files: \type{Language/SPL/Translator.hs}, \type{Language/SPL/Instruction.hs},\crlf \type{Language/SPL/Display.hs}
+
+\chapter[chp:extension]{Extension}
+
+\section{Grammar}
+
+\placetable[][tab:grammar_extension]
+  {}
+  \startgrammar
+  \NC Statement \TQ \dots
+                \OQ \Match\ @(@ Expression @)@ (\Case\ @(@ Expression @)@ Block)\+ \NR
+  \stopgrammar
 
 \chapter[chp:remarks]{Remarks}
 
