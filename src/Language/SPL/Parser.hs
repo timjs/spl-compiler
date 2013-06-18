@@ -4,7 +4,6 @@ import Control.Applicative
 import Data.Functor.Identity (Identity)
 
 import Language.SPL.Lexer
-import Language.SPL.Data.Position
 import Language.SPL.Data.Program
 
 import Text.Parsec.String
@@ -17,7 +16,7 @@ parseSource :: String -> String -> Either ParseError Program
 parseSource = parse source
 
 parseSourceFile :: String -> IO (Either ParseError Program)
-parseSourceFile name = parseSource name <$> readFile name
+parseSourceFile file = parseSource file <$> readFile file
 
 source :: Parser Program
 source = allOf program
@@ -76,6 +75,7 @@ statement, action :: Parser Statement
 statement =   If      <$> (reserved "if" *> parens expression) <*> (block)
                       <*> (option [] (reserved "else" *> block))
           <|> While   <$> (reserved "while" *> parens expression) <*> (block)
+          <|> Match   <$> (reserved "match" *> parens expression) <*> many cas
           <|> Return  <$> (reserved "return" *> optional expression <* semi)
           <|> action
           <?> "statement"
@@ -83,6 +83,8 @@ action    =   identifier >>= \id ->
               Execute id <$> (parensized arguments <* semi)
           <|> Assign  id <$> (equal *> expression <* semi)
           <?> "action"
+cas :: Parser Case
+cas       = Case <$> (reserved "case" *> parens expression) <*> block
 
 expression, term, group, call :: Parser Expression
 expression = expressionBuilder term
