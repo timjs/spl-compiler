@@ -128,8 +128,8 @@ instance Translatable Expression where
                                    Global i -> return $ LDR R5 ## "Load global pointer" ><
                                                         LDA i  ## ("Global variable '" ++ dullify n ++ "'")
     Integer i      -> return $ LDC i    ## ("Push " ++ dullify e)
-    Boolean True   -> return $ LDC 0    ## ("Push " ++ dullify e)
-    Boolean False  -> return $ LDC (-1) ## ("Push " ++ dullify e)
+    Boolean True   -> return $ LDC (-1) ## ("Push " ++ dullify e)
+    Boolean False  -> return $ LDC 0    ## ("Push " ++ dullify e)
     List           -> return $ LDC 0    ## ("Push " ++ dullify e)
     Pair x y       -> do x' <- translate x
                          y' <- translate y

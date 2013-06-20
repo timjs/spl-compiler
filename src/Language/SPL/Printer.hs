@@ -19,7 +19,7 @@ tabstop :: Int
 tabstop = 4
 
 parensized :: (Pretty a) => [a] -> Doc
-parensized = hang 1 . parens . hcat . punctuate (comma <> softline) . map pretty
+parensized = hang 1 . parens . hcat . punctuate comma . map pretty
 --parensized = tupled . map pretty
 
 block :: (Pretty a) => a -> Doc

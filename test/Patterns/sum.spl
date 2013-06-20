@@ -11,5 +11,9 @@ Int sum ([Int] list)
         return x + sum(xs);
 }
 
+Void main () {
+	print(sum(1:2:3:[]));
+}
+
 // vim: ft=c syn=spl
 

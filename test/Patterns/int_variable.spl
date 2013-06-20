@@ -1,7 +1,7 @@
 Int matcher (Int integer)
 {
     Int x = 0;
-    
+
     match integer
     case (0)
         return 0;
@@ -16,12 +16,12 @@ Int matcher (Int integer)
 }
 
 Void main () {
-	print(matcher(0));
-	print(matcher(1));
-	print(matcher(2));
-	print(matcher(3));
-	print(matcher(4));
-	print(matcher(5));
+	print(matcher(0));// => 0
+	print(matcher(1));// => 2
+	print(matcher(2));// => 4
+	print(matcher(3));// => 9
+	print(matcher(4));// => 8
+	print(matcher(5));// => 15
 }
 
 // vim: ft=c syn=spl
