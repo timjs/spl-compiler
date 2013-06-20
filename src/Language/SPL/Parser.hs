@@ -1,10 +1,11 @@
+{-# LANGUAGE LambdaCase #-}
 module Language.SPL.Parser where
 
 import Control.Applicative
 import Data.Functor.Identity (Identity)
 
 import Language.SPL.Lexer
-import Language.SPL.Data.Program
+import Language.SPL.Data.Program hiding (pattern) -- FIXME
 
 import Text.Parsec.String
 import Text.Parsec.Combinator hiding (optional)
@@ -86,9 +87,24 @@ action    =   identifier >>= \id ->
 
 cas :: Parser Case
 cas     = Case <$> (reserved "case" *> parens pattern) <*> block
+
+{-
+pattern, patterns :: Parser Pattern
+patterns = pattern `sepBy1` (symbol ":") >>= \case
+             [p] -> return p
+             ps  -> return (ConsPattern ps)
+pattern  =   AnyPattern        <$  symbol "_"
+         <|> ListPattern       <$  symbol "[]"
+         <|> BoolPattern True  <$  reserved "True"
+         <|> BoolPattern False <$  reserved "False"
+         <|> IntPattern        <$> decimal
+         <|> PairPattern       <$> (paren *> pattern) <*> (comma *> pattern <* paren)
+         <|> NamePattern       <$> identifier
+         <?> "pattern"
+-}
 pattern, patternCons :: Parser Pattern
 pattern = patternCons `chainr1` patternOper
-patternCons =   Anything          <$  symbol "_"
+patternCons =   AnyPattern          <$  symbol "_"
             <|> ListPattern       <$  symbol "[]"
             <|> BoolPattern True  <$  reserved "True"
             <|> BoolPattern False <$  reserved "False"
@@ -98,12 +114,6 @@ patternCons =   Anything          <$  symbol "_"
             <?> "pattern"
 patternOper :: Parser (Pattern -> Pattern -> Pattern)
 patternOper = ConsPattern <$ symbol ":"
---patternOper = symbol ":" >> return ConsPattern
-            -- empty
-            -- <|> ConsPattern x <$> (symbol ":" *> pattern)
---named   =   identifier >>= \id ->
-            --ConsPattern (NamePattern id) <$> (symbol ":" *> pattern)
-        -- <|> pure (NamePattern id)
 
 expression, term, group, call :: Parser Expression
 expression = expressionBuilder term

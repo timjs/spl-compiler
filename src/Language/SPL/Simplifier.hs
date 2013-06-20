@@ -73,27 +73,71 @@ instance Simplifiable Constructs (Constructs,Statements) where
   simplify cs = do (cs',ss') <- unzip <$> mapM simplify cs
                    return (cs', concat ss')
 
+{- Statements -
+ -}
 instance Simplifiable Statement Statements where
-  simplify (Assign  n (Call m e)) = do (ss,e') <- simplify e
-                                       return $ ss |> Assign n (Call m e')
-  simplify (Assign  n e)          = do (ss,e') <- simplify e
-                                       return $ ss |> Assign n e'
-  simplify (If      c ts fs)      = do (ss,c') <- simplify c
-                                       ts'     <- simplify ts
-                                       fs'     <- simplify fs
-                                       return $ ss |> If c' ts' fs'
-  simplify (While   c ds)         = do (ss,c') <- simplify c
-                                       ds'     <- simplify ds
-                                       return $ ss |> While c' ds'
-  simplify (Return  Nothing)      = return [Return Nothing]
-  simplify (Return  (Just e))     = do (ss,e') <- simplify e
-                                       return $ ss |> Return (Just e')
-  simplify (Execute n as)         = do (ss,as') <- simplify as
-                                       return $ ss |> Execute n as'
+  simplify s = case s of
+    Assign  n (Call m e) -> do (ss,e') <- simplify e
+                               return $ ss |> Assign n (Call m e')
+    Assign  n e          -> do (ss,e') <- simplify e
+                               return $ ss |> Assign n e'
+    If      c ts fs      -> do (ss,c') <- simplify c
+                               ts'     <- simplify ts
+                               fs'     <- simplify fs
+                               return $ ss |> If c' ts' fs'
+    While   c ds         -> do (ss,c') <- simplify c
+                               ds'     <- simplify ds
+                               return $ ss |> While c' ds'
+    Match   n cs         -> do cs' <- simplify cs -- :: Expression -> Statement
+                               return $ [cs' (Value n)] -- TODO Simplify again!!!
+    Return  Nothing      -> return [Return Nothing]
+    Return  (Just e)     -> do (ss,e') <- simplify e
+                               return $ ss |> Return (Just e')
+    Execute n as         -> do (ss,as') <- simplify as
+                               return $ ss |> Execute n as'
 
 instance Simplifiable Statements Statements where
   simplify ss = concat <$> mapM simplify ss--FIXME: lift map?
 
+{- Cases -
+ -}
+instance Simplifiable Case (Expression -> Statement) where
+  simplify (Case p ss) = do ss' <- simplify ss
+                            p'  <- simplify p -- :: Expression -> (Expression,Statements)
+                            let (c,as) = (fst . p', snd . p')
+                            return $ \e -> If (c e) (as e ++ ss') []
+
+instance Simplifiable Cases (Expression -> Statement) where
+  simplify cs = do fs <- mapM simplify cs
+                   return $ foldr1 combine . sequence fs
+    where
+      combine (If c ss []) s = If c ss [s]
+
+{- Patterns -
+ - 
+ - Returns a function taking the Name of the matcher
+ - and returns an Expression to test in an If Statement
+ - and possibly some statements with assignments,
+ - to be put in the body of the If.
+ -}
+instance Simplifiable Pattern (Expression -> (Expression,Statements)) where
+  simplify p = case p of
+      AnyPattern        -> return $ \_ -> (Boolean True, [])
+      IntPattern  i     -> return $ \e -> (Infix Eq e (Integer i), [])
+      BoolPattern True  -> return $ \e -> (e, [])
+      BoolPattern False -> return $ \e -> (Prefix Not e, [])
+      NamePattern n     -> return $ \e -> (Boolean True, [Assign n e])
+      ListPattern       -> return $ \e -> (Call IsEmpty [e], [])
+      ConsPattern l r   -> do l' <- simplify l -- :: Expression -> (Expression,Statements)
+                              r' <- simplify r -- :: Expression -> (Expression,Statements)
+                              return $ \e -> l' (Call Head [e]) `combine` r' (Call Tail [e])
+      PairPattern l r   -> error "pair pattern matching not yet implemented"
+      where
+        combine :: (Expression,Statements) -> (Expression,Statements) -> (Expression,Statements)
+        combine (e,s) (e',s') = (Infix And e e', s ++ s')
+
+{- Expressions -
+ -}
 instance Simplifiable Expression (Statements, Expression) where
   simplify (Pair    a b)   = do (ss,[a',b']) <- simplify [a,b]
                                 return (ss, Pair a' b')
@@ -132,4 +176,3 @@ instance Commutable Statement where
 
 instance Commutable Statements where
   e <-> ss = all (e <->) ss
-

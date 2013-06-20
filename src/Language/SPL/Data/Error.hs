@@ -21,12 +21,14 @@ data Error = TypeMismatch Type Name Type -- expected type, var name, var type
            | VariableNotDeclared Name
            | VariableNotInScope Name
            | FunctionNotInScope Name
+           | FunctionUsedAsPattern Name
            | ArrityMismatch Arrity Name Arrity   -- expected arr, fun name, fun arr
            | UnusedReturnValue Name Type
            | DuplicatedName Name
            | FunctionUsedAsVariable Name
            | VariableUsedAsFunction Name
-           | Mistery Type Expression
+           | ExpressionMismatch Type Expression
+           | PatternMismatch Type Pattern
            deriving (Show, Eq, Ord)
 
 type Reporter = Writer Errors
@@ -39,9 +41,6 @@ report p e = do
 runReporter = runWriter
 
 instance Pretty Error where
-  --pretty (TypeUnexpected t t')
-  --  = text "Could not match expected type" <+> pretty t </>
-  --    text "with actual type" <+> pretty t'
   pretty (TypeMismatch t n t')
     = text "Expected type" <+> pretty t </>
       text "but" <+> pretty n <+> text "has type" <+> pretty t'
@@ -63,11 +62,16 @@ instance Pretty Error where
     = text "Name" <+> pretty n <+> text "is multiple defined"
   pretty (FunctionUsedAsVariable n)
     = text "Function name" <+> pretty n <+> text "is used as a variable"
+  pretty (FunctionUsedAsPattern n)
+    = text "Function name" <+> pretty n <+> text "is can not be used to match"
   pretty (VariableUsedAsFunction n)
     = text "Variable name" <+> pretty n <+> text "is used as a function"
-  pretty (Mistery t e)
-    = text "Some misterious error occured when matching" <+> pretty t </>
-      text "to" <+> pretty e
+  pretty (ExpressionMismatch t e)
+    = text "Expression" <+> pretty e </>
+      text "does not match expected type" <+> pretty t
+  pretty (PatternMismatch t e)
+    = text "Pattern" <+> pretty e </>
+      text "does not match expected type" <+> pretty t
 
 instance Pretty Errors where
   pretty = Print.vsep . map format . Multi.toList

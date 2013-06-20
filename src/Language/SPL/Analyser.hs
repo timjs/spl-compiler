@@ -6,6 +6,8 @@ import Language.SPL.Data.Position
 import Language.SPL.Data.Environment
 import Language.SPL.Data.Error
 
+import Language.SPL.Helpers
+
 import Control.Applicative
 
 import Control.Monad.Reader
@@ -37,7 +39,7 @@ c <?> t = c >>= \c' -> if c' then return True else t
 (<&>) = liftM2 (&&)
 
 analyse :: Program -> (Bool,Errors)
-analyse p = runAnalyser (tell es >> check p) gs
+analyse p = runAnalyser (tell es >> check p) (tracePretty "Globals" gs)
       where (gs,es) = runReporter $ globals p
 {-runAnalyser (do
               tell es
@@ -69,11 +71,17 @@ instance (Checkable a) => Checkable [a] where
  -}
 instance Checkable Construct where
   check   (Declaration t _ e)       = e =~ t
-  check d@(Definition  t _ _ cs bs) = do
+  check d@(Definition  t n _ cs bs) = do
     let (ls,es) = runReporter $ locals d
     tell es
-    local (ls `Map.union`) (bs =~ t <&> check cs <&> check bs)
-      --ask >>= \e -> debug (Print.text "* Locals for" <+> pretty n </> pretty e)
+    --when debug $ do
+      --e <- ask
+      --return $ traceShow ("Locals for", prettify n, "\n", prettify (ls \/ e)) ()
+      --putMsg ["Locals for", prettify n, "\n", prettify (ls \/ e)]
+      --return $ tracePrt ("Locals for" ~~ n) (ls \/ e)
+      --return ()
+      --traceM ("** Locals for " ++ prettify n ++ "\n" ++ prettify (ls \/ e))
+    local (tracePretty ("Locals for", n) ls `Map.union`) (bs =~ t <&> check cs <&> check bs)
 
 {- Statements -
  -
@@ -109,9 +117,12 @@ checkAss n _ (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
 checkAss n _ (Nothing)               = report p (VariableNotDeclared n)
 
 checkMch :: Name -> Cases -> Maybe Info -> Analyser Bool
-checkMch _ cs (Just (Variable t))     = cs =~ t
-checkMch n _  (Just (Function _ _ _)) = report p (FunctionUsedAsVariable n)
+checkMch _ cs (Just (Variable t))     = map pattern cs =~ t
+checkMch n _  (Just (Function _ _ _)) = report p (FunctionUsedAsPattern n)
 checkMch n _  (Nothing)               = report p (VariableNotDeclared n)
+
+--checkPat :: Type -> Case -> Analyser Bool
+--checkPat t (Case p _) = p =~ t
 
 -- Matchable -------------------------------------------------------------------
 
@@ -150,6 +161,17 @@ instance Matchable Statement where
 instance Matchable Case where
   Case _ ss =~ t = ss =~ t
 
+instance Matchable Pattern where
+  AnyPattern      =~ _        = return True
+  BoolPattern _   =~ BOOL     = return True
+  IntPattern _    =~ INT      = return True
+  NamePattern n   =~ t        = checkVar n t =<< info n
+  ListPattern     =~ LIST _   = return True
+  ConsPattern l r =~ LIST t   = l =~ t <&> r =~ LIST t
+  --ConsPattern ps  =~ LIST t   = ps =~ t
+  PairPattern x y =~ PAIR t s = x =~ t <&> y =~ s
+  e               =~ t        = report p (PatternMismatch t e)
+
 instance Matchable Expression where
   Boolean _      =~ BOOL     = return True
   Integer _      =~ INT      = return True
@@ -168,7 +190,7 @@ instance Matchable Expression where
   Prefix Not e   =~ BOOL     = e =~ BOOL
   Prefix Neg e   =~ INT      = e =~ INT
   _              =~ POLY _   = return True
-  e              =~ t        = report p (Mistery t e)
+  e              =~ t        = report p (ExpressionMismatch t e)
 
 instance Matchable Type where
   POLY _   =~ _          = return True

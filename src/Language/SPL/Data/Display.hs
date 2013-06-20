@@ -1,7 +1,10 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts #-}
 module Language.SPL.Data.Display where
 
 import Language.SPL.Data.Program
+
+import Language.SPL.Printer (Pretty,pretty)
+import qualified Language.SPL.Printer as Print
 
 import Data.Maybe
 import Data.Map (Map)
@@ -25,3 +28,10 @@ makeDisplay (Definition _ _ ps cs _)       = Map.fromList arguments `Map.union` 
 	where
     arguments = zip (map name ps) (map (Local . negate) [1..])
     variables = zip (map name cs) (map Local [1..])
+
+instance Pretty Display where
+  pretty = Print.vsep . map format . Map.toList
+     where format (n,i) = pretty n Print.<> Print.text ": " Print.<> pretty i
+
+instance Pretty Location where
+  pretty = Print.text . show

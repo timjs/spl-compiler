@@ -6,6 +6,7 @@ import Prelude hiding (EQ,GT,LT)
 import Data.Maybe
 
 import Language.SPL.Printer (dullify)
+import Language.SPL.Helpers
 
 import Language.SPL.Data.Program
 import Language.SPL.Data.Instruction
@@ -18,14 +19,6 @@ import Data.Sequence (Seq,empty,singleton,(><))
 
 import Control.Monad.Reader
 import Control.Monad.Supply
-
-import Debug.Trace
-
-traceM :: (Show a, Monad m) => String -> a -> m a
-traceM s x = trace (s ++ show x) (return x)
-
-traceS :: (Show a) => String -> a -> a
-traceS s x = trace (s ++ show x) x
 
 -- Locator Monad --------------------------------------------------------------
 -- The Locator monad is a Reader of Location from a Display
@@ -42,7 +35,7 @@ labels :: [String]
 labels = map ('_':) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
 
 compile :: Program -> Instructions
-compile p = evalSupplier (translate p) labels (traceS "** globals: " (makeDisplay $ head p))
+compile p = evalSupplier (translate p) labels (tracePretty ("Globals:") (makeDisplay (head p)))
 
 class Translatable a where
   translate :: a -> Locator (Seq Instruction)
@@ -57,26 +50,20 @@ instance Translatable Construct where
     Declaration _ n _             -> return $ LDC 0 ## ("Initialize " ++ dullify n)
     -- Function definitions are more complicated
     Definition _ Globals [] cs ss -> do cs' <- translate cs
-                                        globals <- ask
-                                        traceM "** locals for _globals: " $ makeDisplay c `Map.union` globals
-                                        ss' <- local (makeDisplay c `Map.union`) $ translate ss--FIXME: use \/ ?
+                                        ss' <- local (tracePretty ("Locals for _globals") (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
                                         return $ dullify Globals # LDR SP ## "Load current stack pointer..."       ><
                                                                    STR GP ## "...and save it to reference globals" ><
                                                                    cs'                                             ><
                                                                    ss'
     Definition _ Main [] cs ss    -> do cs' <- translate cs
-                                        globals <- ask
-                                        traceM "** locals for main: " $ makeDisplay c `Map.union` globals
-                                        ss' <- local (makeDisplay c `Map.union`) $ translate ss--FIXME: use \/ ?
+                                        ss' <- local (tracePretty ("Locals for main") (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
                                         return $ dullify Main # LDR SP ## "Load current stack pointer..."            ><
                                                                 STR MP ## "...and mark this as a new local function" ><
                                                                 cs'                                                  ><
                                                                 ss'                                                  ><
                                                                 HALT   ## "Halt machine"
     Definition _ n _ cs ss        -> do cs' <- translate cs
-                                        globals <- ask
-                                        traceM ("** locals for " ++ show n) $ makeDisplay c `Map.union` globals
-                                        ss' <- local (makeDisplay c `Map.union`) $ translate ss--FIXME: use \/ ?
+                                        ss' <- local (tracePretty ("Locals for",n) (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
                                         return $ dullify n # LDR MP                               ><
                                                              LDRR MP SP ## "Set new mark pointer" ><
                                                              cs'                                  ><

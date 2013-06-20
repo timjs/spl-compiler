@@ -9,6 +9,9 @@
 		},
 		{
 			"path": "util"
+		},
+		{
+			"path": "src/Utility"
 		}
 	],
 	"settings":

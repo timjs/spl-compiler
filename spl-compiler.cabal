@@ -17,8 +17,8 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Language.SPL.Analyser, Language.SPL.Lexer, Language.SPL.Parser, Language.SPL.Printer, Language.SPL.Simplifier, Language.SPL.Translator
                        Language.SPL.Data.Display, Language.SPL.Data.Environment, Language.SPL.Data.Error, Language.SPL.Data.Instruction, Language.SPL.Data.Position, Language.SPL.Data.Program,
-                       Data.MultiMap
-  -- other-modules:
+                       Data.MultiMap, Language.SPL.Helpers
+  -- other-modules:       
   build-depends:       base, mtl, transformers, containers, parsec, ansi-wl-pprint, monad-supply, filepath
   hs-source-dirs:      src
 

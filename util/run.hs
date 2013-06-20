@@ -21,7 +21,6 @@ main = do
   case e of
     Right p -> do
       putInf "Parsing succeded"
-      print p
       print $ pretty p
       putAct "Analysing"
       let (b,r) = (analyse p)
@@ -33,7 +32,6 @@ main = do
           print $ pretty p'
           putAct "Compiling"
           let c = compile p'
-          print c
           print $ pretty c
           writeFile (replaceExtension f ".ssm") (dullify c)
         else do

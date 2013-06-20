@@ -62,14 +62,16 @@ data Expression  = Value    Name
 type Cases   = [Case]
 data Case    = Case Pattern Statements
              deriving (Show, Eq, Ord)
-data Pattern = Anything
-             | NamePattern Name
-             | ListPattern
-             | ConsPattern Pattern Pattern
-             | PairPattern Pattern Pattern
-             | IntPattern  Integer
-             | BoolPattern Bool
-             deriving (Show, Eq, Ord)
+type Patterns = [Pattern]
+data Pattern  = AnyPattern                  -- Anything
+              | NamePattern Name            -- Binding
+              | BoolPattern Bool            -- Constant BOOL
+              | IntPattern  Integer         -- Constant INT
+              | ListPattern                 -- Constant (LIST _)
+              -- | ConsPattern Patterns        -- ???
+              | ConsPattern Pattern Pattern 
+              | PairPattern Pattern Pattern -- ???
+              deriving (Show, Eq, Ord)
 
 data BinaryOperator = Add | Sub | Mul | Div | Mod
                     | Eq | Ne | Lt | Gt | Le | Ge 
@@ -88,6 +90,9 @@ instance HasName Construct where
   name (Definition _ n _ _ _) = n
 instance HasName Parameter where
   name (Parameter _ n) = n
+
+pattern :: Case -> Pattern
+pattern (Case p _) = p
 
 isDefinition :: Construct -> Bool
 isDefinition Definition {} = True
@@ -167,13 +172,14 @@ instance Pretty Cases where
 
 instance Pretty Pattern where
   pretty p = case p of
-    Anything        -> constant '_'
+    AnyPattern      -> constant '_'
     NamePattern n   -> identifier n
-    ListPattern     -> constant "[]"
-    ConsPattern l r -> pretty l <> operator ':' <> pretty r --TODO: parens ?
-    PairPattern l r -> parensized [l,r]
     IntPattern  i   -> constant i
     BoolPattern b   -> constant b
+    ListPattern     -> constant "[]"
+    ConsPattern l r -> pretty l <> operator ':' <> pretty r
+    --ConsPattern ps  -> cat $ punctuate colon (map pretty ps) --TODO: parens ?
+    PairPattern l r -> parensized [l,r]
 
 instance Pretty Expression where
   pretty e = case e of
