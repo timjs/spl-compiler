@@ -53,22 +53,22 @@ instance Translatable Construct where
     -- Function definitions are more complicated
     Definition _ Globals [] cs ss -> do cs' <- translate cs
                                         ss' <- local (tracePretty ("Locals for _globals") (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
-                                        return $ dullify Globals # LDR SP ## "Load current stack pointer..."       ><
-                                                                   STR GP ## "...and save it to reference globals" ><
-                                                                   cs'                                             ><
+                                        return $ dullify Globals # LDR SP ## "Push current stack pointer"       ><
+                                                                   STR GP ## "and save it to reference globals" ><
+                                                                   cs'                                          ><
                                                                    ss'
     Definition _ Main [] cs ss    -> do cs' <- translate cs
                                         ss' <- local (tracePretty ("Locals for main") (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
-                                        return $ dullify Main # LDR SP ## "Load current stack pointer..."            ><
-                                                                STR MP ## "...and mark this as a new local function" ><
-                                                                cs'                                                  ><
-                                                                ss'                                                  ><
+                                        return $ dullify Main # LDR SP ## "Push current stack pointer"   ><
+                                                                STR MP ## "and mark this as a new frame" ><
+                                                                cs'                                      ><
+                                                                ss'                                      ><
                                                                 HALT   ## "Halt machine"
     Definition _ n _ cs ss        -> do cs' <- translate cs
                                         ss' <- local (tracePretty ("Locals for",n) (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
-                                        return $ dullify n # LDR MP                               ><
-                                                             LDRR MP SP ## "Set new mark pointer" ><
-                                                             cs'                                  ><
+                                        return $ dullify n # LDR MP     ## "Push and save old mark pointer" ><
+                                                             LDRR MP SP ## "Set new mark pointer"           ><
+                                                             cs'                                            ><
                                                              ss'
 
 instance Translatable Statement where
@@ -76,80 +76,97 @@ instance Translatable Statement where
     Assign n e      -> do e' <- translate e
                           l  <- location n
                           case l of
-                            Local  i -> return $ e'                 ><
-                                                 STL i ## dullify s
-                            Global i -> return $ e'                              ><
-                                                 LDR GP ## "Load global pointer" ><
-                                                 STA i  ## dullify s
+                            Local  i -> return $ e'                                 ><
+                                                 STL i  ## ("Assign " ++ dullify s)
+                            Global i -> return $ e'                                 ><
+                                                 LDR GP ## "Load global pointer"    ><
+                                                 STA i  ## ("Assign " ++ dullify s)
     If c ts fs      -> do t <- supply
                           let [ifLabel,thenLabel,elseLabel,fiLabel] = map (\l -> "_" ++ l ++ t) ["if","then","else","fi"]
                           c'  <- translate c
                           ts' <- translate ts
                           fs' <- translate fs
-                          return $ ifLabel   # c'            ## dullify c   ><
-                                               BRF elseLabel ## "Skip then" ><
-                                   thenLabel # ts'                          ><
-                                               BRA fiLabel   ## "Skip else" ><
-                                   elseLabel # fs'                          ><
+                          return $ ifLabel   # c'                                    ><
+                                               BRF elseLabel ## "Skip then if False" ><
+                                   thenLabel # ts'                                   ><
+                                               BRA fiLabel   ## "Skip else"          ><
+                                   elseLabel # fs'                                   ><
                                    fiLabel   # NOP
     While c ds      -> do t <- supply
                           let [whileLabel,doLabel,odLabel] = map (\l -> "_" ++ l ++ t) ["while","do","od"]
                           c'  <- translate c
                           ds' <- translate ds
-                          return $ whileLabel # c'             ## dullify c ><
-                                                BRF odLabel    ## "Skip do" ><
-                                   doLabel    # ds'                         ><
-                                                BRA whileLabel ## "Loop"    ><
+                          return $ whileLabel # c'             ## dullify c          ><
+                                                BRF odLabel    ## "Skip do if false" ><
+                                   doLabel    # ds'                                  ><
+                                                BRA whileLabel ## "Loop"             ><
                                    odLabel    # NOP
-    Return Nothing  -> return $ LDRR SP MP    ## "Adjust stack pointer" ><
-                                STR MP        ## "Reset mark pointer"   ><
-                                RET ## "Return"
+    Return Nothing  -> return $ LDRR SP MP ## "Move stack pointer to top of frame" ><
+                                STR MP     ## "Reset mark pointer"                 ><
+                                RET        ## "Return"
     Return (Just e) -> do e' <- translate e
                           rn <- translate (Return Nothing)
-                          return $ e'                             ><
-                                   STR RR ## "Store return value" ><
+                          return $ e'                            ><
+                                   STR RR ## "Save return value" ><
                                    rn
-    -- We inline basic functions
+    -- We inline print
     Execute Print a -> do a' <- translate a
-                          return $ a'     ><
+                          return $ a'                                ><
                                    TRAP 0 ## ("Print " ++ dullify a)
+    
     -- Function calls place their own arguments on the stack and remove them afterwards
     Execute n as    -> do as' <- translate $ reverse as
-                          return $ as'                                     ><
-                                   LDC' (dullify n)  ## "Load label"       ><
-                                   JSR               ## dullify s          ><
+                          return $ as'                                                       ><
+                                   LDC' (dullify n)  ## ("Push label '" ++ dullify n ++ "'") ><
+                                   JSR               ## ("Call '" ++ dullify s ++ "'")       ><
                                    AJS (- length as) ## "Remove arguments"
 
 instance Translatable Expression where
   translate e = case e of
     Value n        -> do l <- location n
-                         case l of Local  i -> return $ LDL i ## (dullify n ++ " (local)")
+                         case l of Local  i -> return $ LDL i  ## ("Local variable '" ++ dullify n ++ "'")
                                    Global i -> return $ LDR GP ## "Load global pointer" ><
-                                                        LDA i  ## (dullify n ++ " (global)")
-    Integer i      -> return $ LDC i ## dullify e
-    Boolean True   -> return $ LDC 0 ## dullify e
-    Boolean False  -> return $ LDC (-1) ## dullify e
-    List           -> return $ LDC 0 ## dullify e
+                                                        LDA i  ## ("Global variable '" ++ dullify n ++ "'")
+    Integer i      -> return $ LDC i    ## ("Push " ++ dullify e)
+    Boolean True   -> return $ LDC 0    ## ("Push " ++ dullify e)
+    Boolean False  -> return $ LDC (-1) ## ("Push " ++ dullify e)
+    List           -> return $ LDC 0    ## ("Push " ++ dullify e)
     Pair x y       -> do x' <- translate x
                          y' <- translate y
-                         return $ x'                       ><
-                                  y'                       ><
+                         return $ x'     ## "Fst of pair"  ><
+                                  y'     ## "Snd of pair"  ><
                                   STMH 2 ## "Save in heap"
+    -- We inline basic functions
+    Call Head a    -> translate $ Call Snd a -- Lists are stored in the as tuples of (tail, head),
+    Call Tail a    -> translate $ Call Fst a -- so we can build them up more quickly.
+    Call Fst  a    -> do a' <- translate a
+                         return $ a'                                      ><
+                                  LDMH 0 2 ## "Push tuple/list from heap" ><
+                                  AJS (-1) ## "Remove snd/head"
+    Call Snd  a    -> do a' <- translate a
+                         return $ a'                                        ><
+                                  LDMH 0 2 ## "Push tuple/list from heap"   ><
+                                  SWP      ## "Swap fst/tail with snd/head" ><
+                                  AJS (-1) ## "Remove fst/tail"
+    -- and delegate other callst to Execute
     Call n as      -> do ex <- translate (Execute n as)
-                         return $ ex     ><
+                         return $ ex                            ><
                                   LDR RR ## "Load return value"
     Infix Cons l r -> do r' <- translate r
                          l' <- translate l
-                         return $ r'                       ><
-                                  l'                       ><
+                         return $ r'     ## "Tail of list" ><
+                                  l'     ## "Head of list" ><
                                   STMH 2 ## "Save in heap"
     Infix o l r    -> do l' <- translate l
                          r' <- translate r
                          o' <- translate o
-                         return $ l' >< r' >< o'
+                         return $ l' ><
+                                  r' ><
+                                  o' ## ("Calculate '" ++ dullify e ++ "'")
     Prefix o a     -> do a' <- translate a
                          o' <- translate o
-                         return $ a' >< o'
+                         return $ a' ><
+                                  o' ## ("Calculate '" ++ dullify e ++ "'")
 
 instance Translatable BinaryOperator where
   translate o = fromJust . Map.lookup o $ operators
