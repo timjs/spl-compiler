@@ -1,5 +1,7 @@
-Int matcher ((Int,Bool) pair)
+Int matcher (Int i ,Bool b)
 {
+	(Int,Bool) pair = (i,b);
+
     match pair
     case ((0,True))
         return 0;
@@ -18,4 +20,3 @@ Void main () {
 }
 
 // vim: ft=c syn=spl
-

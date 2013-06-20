@@ -1,5 +1,7 @@
-Int test ([Int] list)
+Int matcher ([Int] list)
 {
+	[Int] xs = [];
+	
     match list
     case ([])
         return 0;

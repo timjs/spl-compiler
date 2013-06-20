@@ -1,6 +1,9 @@
 // Calculate the sum of a list of integers
 Int sum ([Int] list)
 {
+	Int x = 0;// Have to be declared
+	[Int] xs = [];
+
     match list
     case ([])
         return 0;

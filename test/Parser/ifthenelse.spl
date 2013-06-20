@@ -1,0 +1,16 @@
+Int tester () {
+	if (False)
+		return 0;
+	else if (False)
+			return 1;
+		else if (False)
+				return 2;
+			else if (True)
+					return 3;
+}
+
+Void main () {
+	print(tester());
+}
+
+// vim: ft=c syn=spl
