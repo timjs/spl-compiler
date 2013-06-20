@@ -54,7 +54,7 @@ instance Translatable Construct where
     Definition _ Globals [] cs ss -> do cs' <- translate cs
                                         ss' <- local (tracePretty ("Locals for _globals") (makeDisplay c) `Map.union`) $ translate ss--FIXME: use \/ ?
                                         return $ dullify Globals # LDR SP ## "Push current stack pointer"       ><
-                                                                   STR GP ## "and save it to reference globals" ><
+                                                                   STR R5 ## "and save it to reference globals" ><
                                                                    cs'                                          ><
                                                                    ss'
     Definition _ Main [] cs ss    -> do cs' <- translate cs
@@ -79,7 +79,7 @@ instance Translatable Statement where
                             Local  i -> return $ e'                                 ><
                                                  STL i  ## ("Assign " ++ dullify s)
                             Global i -> return $ e'                                 ><
-                                                 LDR GP ## "Load global pointer"    ><
+                                                 LDR R5 ## "Load global pointer"    ><
                                                  STA i  ## ("Assign " ++ dullify s)
     If c ts fs      -> do t <- supply
                           let [ifLabel,thenLabel,elseLabel,fiLabel] = map (\l -> "_" ++ l ++ t) ["if","then","else","fi"]
@@ -125,7 +125,7 @@ instance Translatable Expression where
   translate e = case e of
     Value n        -> do l <- location n
                          case l of Local  i -> return $ LDL i  ## ("Local variable '" ++ dullify n ++ "'")
-                                   Global i -> return $ LDR GP ## "Load global pointer" ><
+                                   Global i -> return $ LDR R5 ## "Load global pointer" ><
                                                         LDA i  ## ("Global variable '" ++ dullify n ++ "'")
     Integer i      -> return $ LDC i    ## ("Push " ++ dullify e)
     Boolean True   -> return $ LDC 0    ## ("Push " ++ dullify e)

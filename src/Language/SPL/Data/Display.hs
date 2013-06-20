@@ -26,7 +26,7 @@ makeDisplay :: Construct -> Display
 makeDisplay (Definition _ Globals [] cs _) = Map.fromList $ zip (map name cs) (map Global [1..])--FIXME: 0 or 1?
 makeDisplay (Definition _ _ ps cs _)       = Map.fromList arguments `Map.union` Map.fromList variables
 	where
-    arguments = zip (map name ps) (map (Local . negate) [1..])
+    arguments = zip (map name ps) (map (Local . negate) [2..])
     variables = zip (map name cs) (map Local [1..])
 
 instance Pretty Display where

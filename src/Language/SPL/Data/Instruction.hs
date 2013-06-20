@@ -13,7 +13,7 @@ type Comment  = String
 type Label    = String
 type Size     = Int
 type Offset   = Int
-data Register = PC | SP | MP | HP | RR | GP | R6 | R7
+data Register = PC | SP | MP | HP | RR | R5 | R6 | R7
               deriving (Show, Eq, Ord, Enum)
 
 data Operation = ADD | SUB | MUL | DIV | MOD | NEG
