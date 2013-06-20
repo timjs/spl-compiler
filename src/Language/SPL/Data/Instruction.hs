@@ -5,8 +5,8 @@ import Language.SPL.Printer (Pretty,pretty,text,char,vsep,indent,fill,(<>),(<+>)
 
 import Prelude hiding (length)
 
-import Data.List ((\\))
-import Data.Sequence (Seq,singleton,viewl,viewr,ViewL(..),ViewR(..),(><))
+import Data.List ((\\),intercalate)
+import Data.Sequence (Seq,singleton,viewl,viewr,ViewL(..),ViewR(..),(><),(<|))
 import Data.Foldable (toList)
 
 type Comment  = String
@@ -69,6 +69,11 @@ instance Annotatable Instructions where
   (viewr -> EmptyR)  ## c = NOP ## c
   (viewr -> is :> i) ## c = is >< i ## c
 
+normalize :: Instruction -> Instructions
+normalize (Instruction (l:l':ls) o cs) = Instruction [l] NOP [] <| normalize (Instruction (l':ls) o cs)
+normalize (Instruction ls o cs)        = singleton $ Instruction ls o [intercalate ", " cs]
+
+
 -- Pretty Printer --------------------------------------------------------------
 
 tabstop :: Int
@@ -86,7 +91,7 @@ instance Pretty Instruction where
   pretty (Instruction [l] o [c]) = fill tabstop (text l <> char ':') <>
                                    fill tabstop (pretty o) <>
                                    char ';' <+> text c
-  pretty _                       = error "multiple annotations in instruction not implemented"
+  pretty i                       = error $ "multiple annotations in instruction not implemented, use normalize: " ++ show i
 
 instance Pretty Instructions where
   pretty = vsep . map pretty . toList

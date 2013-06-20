@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
 module Language.SPL.Translator where
 
-import Prelude hiding (EQ,GT,LT)
+import Prelude hiding (EQ,GT,LT,concatMap)
 
 import Data.Maybe
 
@@ -16,6 +16,8 @@ import qualified Data.Map as Map
 import Data.Map (Map)
 
 import Data.Sequence (Seq,empty,singleton,(><))
+
+import Data.Foldable (foldMap)
 
 import Control.Monad.Reader
 import Control.Monad.Supply
@@ -35,7 +37,7 @@ labels :: [String]
 labels = map ('_':) $ [replicate k ['a'..'z'] | k <- [1..]] >>= sequence
 
 compile :: Program -> Instructions
-compile p = evalSupplier (translate p) labels (tracePretty ("Globals:") (makeDisplay (head p)))
+compile p = foldMap normalize $ evalSupplier (translate p) labels (tracePretty ("Globals:") (makeDisplay (head p)))
 
 class Translatable a where
   translate :: a -> Locator (Seq Instruction)
