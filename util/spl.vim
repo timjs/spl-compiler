@@ -19,7 +19,7 @@ scriptencoding utf-8
 " Syntax Definitions: {{{1
 " ===================
 
-syn keyword splConditional   if else
+syn keyword splConditional   if else match case
 syn keyword splRepeat        while
 syn keyword splStatement     return
 
@@ -29,8 +29,8 @@ syn keyword splFunction      print isEmpty head tail fst snd main
 syn keyword splConstant      True False
 syn match   splNumber        '\<\d\+\>'
 
-syn match  splComment        '//.*$'
-syn region splComment         start='/\*' end='\*/'
+syn match   splComment       '//.*$'
+syn region  splComment       start='/\*' end='\*/'
 
 " Highlight Definitions: {{{1
 " ======================

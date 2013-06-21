@@ -6,21 +6,21 @@ Int matcher (Int integer)
     case (1)
         return 2;
     case (2)
-    	return 4;
+        return 4;
     case (4)
-    	return 8;
+        return 8;
     case (_)
-    	return 16;
+        return 16;
 }
 
 Void main () {
-	print(matcher(0));
-	print(matcher(1));
-	print(matcher(2));
-	print(matcher(3));
-	print(matcher(4));
-	print(matcher(5));
+    print(matcher(0));
+    print(matcher(1));
+    print(matcher(2));
+    print(matcher(3));
+    print(matcher(4));
+    print(matcher(5));
 }
 
-// vim: ft=c syn=spl
+// vim: syn=spl
 

@@ -1,8 +1,8 @@
 // Calculate the sum of a list of integers
 Int sum ([Int] list)
 {
-	Int x = 0;// Have to be declared
-	[Int] xs = [];
+    Int   x  = 0;
+    [Int] xs = [];
 
     match list
     case ([])
@@ -12,8 +12,8 @@ Int sum ([Int] list)
 }
 
 Void main () {
-	print(sum(1:3:5:[]));
+        print(sum(1:3:5:[]));
 }
 
-// vim: ft=c syn=spl
+// vim: syn=spl
 

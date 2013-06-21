@@ -1,24 +1,24 @@
 Int matcher (Int i, Bool b)
 {
-	(Int,Bool) pair = (i,b);
-    Int x = 0;
+    (Int,Bool) pair = (i,b);
+    Int        x    = 0;
 
     match pair
     case ((0,True))
         return 0;
     case ((1,False))
-    	return -1;
+        return -1;
     case ((x,True))
-    	return x;
+        return x;
     case ((x,False))
-    	return -x;
+        return -x;
 }
 
 Void main () {
-	print(matcher(0,True)); // =>  0
-	print(matcher(1,False));// => -1
+    print(matcher(0,True)); // =>  0
+    print(matcher(1,False));// => -1
     print(matcher(4,True)); // =>  4
-	print(matcher(8,False));// => -8
+    print(matcher(8,False));// => -8
 }
 
-// vim: ft=c syn=spl
+// vim: syn=spl
