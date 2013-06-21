@@ -1,0 +1,13 @@
+// Calculate the sum of a list of integers
+Int sum ([Int] list) {
+    if (isEmpty(list))
+        return 0;
+    else
+        return head(list) + sum(tail(list));
+}
+
+Void main () {
+        print(sum(1:3:5:[])); // => 9
+}
+
+// vim: syn=spl

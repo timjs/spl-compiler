@@ -24,17 +24,24 @@
 
 \completecontent[criterium=all]
 
+% -----------------------------------------------------------------------------
+
 \chapter[chp:intro]{Introduction}
 
-This report describes the implementation of a compiler for the \emph{Simple Programming Language}. First, in \see[chp:language], we explain our choice for Haskell as an implementation language. The following sections describe each a particular phase of the compiler implementation. The first phase, parsing and lexing, is discussed \see[chp:parser], including our modifications to the grammar. The pretty printer is discussed in \see[chp:printer]. In \see[chp:analyser] we discus semantic analysis by defining scoping and typing rules. Also, we include some examples characterizing these rules. \see[chp:simplifier] shows which simplifications and transformations we perform on the program, to make compilation easier. The translation itself is discussed in \see[chp:translator]. We conclude in \see[chp:remarks] with an overview of the time investment and some remarks about working on the implementation.
+This report describes the implementation of a compiler for the \emph{Simple Programming Language}. First, in \see[chp:language], we explain our choice for Haskell as an implementation language. The following chapters describe each a particular phase of the compiler implementation. The first phase, parsing and lexing, is discussed \see[chp:parser], including our modifications to the grammar. The pretty printer is discussed in \see[chp:printer]. In \see[chp:analyser] we discus semantic analysis by defining scoping and typing rules. Also, we include some examples characterizing these rules. \see[chp:simplifier] shows which simplifications and transformations we perform on the program, to make compilation easier. The translation itself is discussed in \see[chp:translator]. We have extended our compiler with pattern matching. This is shown in \see[chp:extension]. We conclude in \see[chp:remarks] with an overview of the time investment and some remarks about working on the implementation.
 \stopfrontmatter
 
 \startbodymatter
+
+% -----------------------------------------------------------------------------
+
 \chapter[chp:language]{Language}
 
 As an implementation language I chose Haskell, a pure functional programming language. Haskell is know for its rigid type system, its strong functional programming paradigm and its large community. There are also many great libraries which can be installed through the Cabal package manager. Most importantly, because of its large community there is a lot of documentation on the internet.
 
 Besides these language based arguments, there are some personal aspects I took into account. I wanted to push my functional programming skills to a higher level using functors, applicative functors, monads and monad transformers. It is a real challenge learning, understanding and using these constructs in a real world application!
+
+% -----------------------------------------------------------------------------
 
 \chapter[chp:parser]{Lexing and Parsing}
 
@@ -53,8 +60,7 @@ Apart from some name changes, there are some other small differences from the or
   \NC Definition  \TQ Type Name @(@ Parameters\? @)@
     @\{@ Declaration\* Statement\+ @\}@ \NR
   \NC Type        \TQ \VOID\ \| \INT\ \| \BOOL\
-                  \OQ @(@ Type @,@ Type @)@
-                  \OQ @[@ Type @]@
+                  \OQ @(@ Type @,@ Type @)@ \| @[@ Type @]@
                   \OQ Name \NR
   \NC Parameters  \TQ Type Name (@,@ Parameters)\? \NR
   \NC Arguments   \TQ Expression (@,@ Arguments)\? \NR
@@ -111,21 +117,22 @@ Names of other variables and functions are lexed as shown in \see[tab:lexers]. W
 %%% => Grammar reflected by ast
 %%% => Parsec for all the work
 
-Source file: @Language/SPL/Lexer.hs@.
-
 \section{Implementation}
 
 The parser is written using Parsec, a Haskell parser combinator library originally developed by Daan Leijen \cite[leijen2001parsec]. All work is done chaining Parsec parsers in a Applicative or Monadic way. Parsec also enables us to use \emph{expression tables}: a way to express prefix and infix operators, denoting their fixity and precedence. Therefore we do not have to modify the grammar to express operator precedence.
 
 The abstract syntax tree is an almost one-to-one translation of the grammar found in \see[tab:grammar].
 
-Source files: @Language/SPL/Parser.hs@, @Language/SPL/Expression.hs@,\crlf @Language/SPL/Program.hs@.
+Source files: @Language/SPL/Lexer.hs@, @Language/SPL/Parser.hs@, \crlf
+@Language/SPL/Data/Program.hs@.
 
 \chapter[chp:printer]{Pretty Printing}
 
 The pretty printer is implemented using the \emph{ansi-wl-pprint} \cite[leijen2001pprint] package from Cabal. This is a modified version of Philip Wadler's \emph{A prettier printer} \cite[wadler2003prettier] making use of colored terminal output. There is also a version available which makes use of the @Text@ data type. This could be used in the future for better performance.
 
-Source file: @Language/SPL/Printer.hs@.
+Source files: @Language/SPL/Printer.hs@ and the files in @Language/SPL/Data/@.
+
+% -----------------------------------------------------------------------------
 
 \chapter[chp:analyser]{Analysing}
 
@@ -154,11 +161,9 @@ Contains only variables declared at the start of the function body.
 All bindings are contained in an \emph{environment}: a map from names to variable and function information.
 To lookup names in function bodies will first look at the local declarations, then at the function parameters, then at the global declarations and at last at the built in definitions.
 
-Source file: @Language/SPL/Environment.hs@.
+\section[sec:types]{Types}
 
-\section{Types}
-
-In this section we discuss several type check rules for \SPL. Each rule uses an \emph{environment} $\Gamma : X \to \Sigma$, a map from variables $X$ to types $\Sigma$. The environment is constructed by following the scoping rules given above. Typing statements are given by $\Gamma \vdash x:\sigma$, which should be read as \emph{$x$ has type $\sigma$ is derived from $\Gamma$}. Basic types are \Bool, \Int, $[\sigma]$ (list of $\sigma$) and $(\sigma,\tau)$ (pair of $\sigma$ and $\tau$). The types of other language constructs are derived by the rules given in this section.
+In this section we discuss several type checking rules for \SPL. Each rule uses an \emph{environment} $\Gamma : X \to \Sigma$, a map from variables $X$ to types $\Sigma$. The environment is constructed by following the scoping rules given above. Typing statements are given by $\Gamma \vdash x:\sigma$, which should be read as \emph{$x$ has type $\sigma$ is derived from $\Gamma$}. Basic types are \Bool, \Int, $[\sigma]$ (list of $\sigma$) and $(\sigma,\tau)$ (pair of $\sigma$ and $\tau$). The types of other language constructs are derived by the rules given in this section.
 
 \subsubject{Expressions}
 
@@ -321,7 +326,7 @@ Blocks of \If\ and \While\ statements can also contain a \Return, so we have to 
 
 Types are not assigned to other statements.
 
-\subsubject{Built-in functions}
+\subsubject{Built in functions}
 
 Built in functions have the following types:
 
@@ -381,38 +386,40 @@ Built in functions have the following types:
 
 \subsubject{Pass}
 
-\typeSPLfile{Examples/Analyser/globals.spl}
-\typeSPLfile{Examples/Analyser/order.spl}
-\typeSPLfile{Examples/Analyser/infinite.spl}
-\typeSPLfile{Examples/Library/lists.spl}
+\typeSPLfile{../test/Analyser/globals.spl}
+\typeSPLfile{../test/Analyser/order.spl}
+\typeSPLfile{../test/Analyser/infinite.spl}
+\typeSPLfile{../test/Library/lists.spl}
 
 \subsubject{Fail}
 
-\typeSPLfile{Examples/Analyser/arguments.spl}
-\typeSPLfile{Examples/Analyser/return.spl}
-\typeSPLfile{Examples/Analyser/call.spl}
-\typeSPLfile{Examples/Analyser/duplicates.spl}
-\typeSPLfile{Examples/Analyser/undeclared.spl}
-\typeSPLfile{Examples/Analyser/unmatched.spl}
+\typeSPLfile{../test/Analyser/arguments.spl}
+\typeSPLfile{../test/Analyser/return.spl}
+\typeSPLfile{../test/Analyser/call.spl}
+\typeSPLfile{../test/Analyser/duplicates.spl}
+\typeSPLfile{../test/Analyser/undeclared.spl}
+\typeSPLfile{../test/Analyser/unmatched.spl}
 
 \section{Implementation}
 
 The analyser is implemented by stacking the @Reader@ and @Writer@ monads on top of each other. @Reader@ is used to pass around the environment implicitly and @Writer@ to collect the errors produced during the analyser phase.
 
-Source files: @Language/SPL/Error.hs@, @Language/SPL/Analyser.hs@.
+Source files: @Language/SPL/Analyser.hs@, @Language/SPL/Data/Environment.hs@, @Language/SPL/Data/Error.hs@.
+
+% -----------------------------------------------------------------------------
 
 \chapter[chp:simplifier]{Simplifying}
 
 We do not use a special intermediate representation. The \SPL\ language has a clear separation between statements and expressions and is simple enough to serve this purpose. Nevertheless, we need to simplify our original program a bit to make generation of instructions easier.
 
-First of all we transform all declarations to ordinary assignments, so that a canonical \SPL\ function starts with the initialization of its local variables. All global variables have to be initialized too. Therefore we add the corresponding assignments to the \Main\ function. Second, we have to make sure expressions do not have side effects. The only way side effects can occur is by a function call inside an expressions. Thus we need to extract function calls, assign the result to a temporary variable and refer to this variable in the original expression.
+First of all we transform all declarations to ordinary assignments, so that a canonical \SPL\ function starts with the initialization of its local variables. All global variables have to be initialized too. Therefore we make a special procedure \Globals\ which we run first. Second, we have to make sure expressions do not have side effects. The only way side effects can occur is by a function call inside an expressions. Thus we need to extract function calls, assign the result to a temporary variable and refer to this variable in the original expression.
 
 \section{Rules}
 
-In the next paragraphs we give the simplification rules for \SPL. As with the typing rules in \see[chp:types], they consist of a premise and a result. There are four types of simplifications: for a statement ($\Stm$), for an expression ($\Exp$) and for sequences of statements ($\Stms$) or expressions ($\Exps$). These simplifications are denoted by a double arrow $\leadsto_x$ where the subscript $x$ is used to discriminate between the four types.
+In the next paragraphs we give the simplification rules for \SPL. As with the typing rules in \see[sec:types], they consist of a premise and a result. There are four types of simplifications: for a statement ($\Stm$), for an expression ($\Exp$) and for sequences of statements ($\Stms$) or expressions ($\Exps$). These simplifications are denoted by a double arrow $\leadsto_x$ where the subscript $x$ is used to discriminate between the four types.
 
 \reference[txt:sequences]
-In the rules we use the notion of \emph{sequences}. A sequence is an ordered list of elements between angle brackets. The sequence of the numbers one till five is given by $\<1,2,3,4,5\>$. We can perform three different operations on sequences: append an element to the left (\emph{cons}), append an element to the right (\emph{snoc}) and \emph{concatenate} two sequences. These operations are performed by the operators $\triangleleft$, $\triangleright$ and $\bowtie$. Thus the result of $\<1,2\> \triangleright 3$ is the sequence $\<1,2,3\>$.
+In the rules we use the notion of \emph{sequences}. A sequence is an ordered list of elements between angle brackets. The sequence of the numbers one till five is given by $\<1,2,3,4,5\>$. We can perform three different operations on sequences: append an element to the left (\emph{cons}), append an element to the right (\emph{snoc}) and \emph{concatenate} two sequences. These operations are performed by the operators $\triangleleft$, $\triangleright$ and $\bowtie$. Thus the result of $\<1,2\> \triangleright 3$ is the sequence $\<1,2,3\>$.\footnote{Mnemonic: a triangle with the single element at the pointy end.}
 
 \subsubject{Statements}
 
@@ -472,7 +479,7 @@ The simplification of a statement can return multiple statements. Thus $\leadsto
 
 \subsubject{Expressions}
 
-The simplification of an expressions pulls side effects and pushes them to new statements. Next to a new expression, the simplification also needs to return these statments:
+The simplification of an expressions pulls side effects and pushes them to new statements. Next to a new expression, the simplification also needs to return these statements:
 
 \placeformula[for:simplify_exp]
   \startformula
@@ -573,7 +580,7 @@ Simplifying a sequence of statements is just simplifying each statement and conc
   \<s_1,\dots,s_n\> \leadsto_\Stms \bigbowtie_{i=1}^n \<s^{(i)}_1,\dots,s^{(i)}_{m_i}\>
   \stopderivationformula
 
-To simplify a sequence of expressions we some extra machinery. Lets simplify one expression, this leads to statements $\<s_1,\dots,s_n\>$ and a new expression $e_1$. Simplifying another expression leads to $\<s_1',\dots,s_m'\>$ and $e_2$. We can only pull $e_1$ over the statements $\<s_1',\dots,s_m'\>$ iff the statements do not interfere with the result of expression $e_1$: they have to \emph{commute}. Otherwise we need to introduce a new temporary variable, assign the result of $e_1$ to it and pull \emph{this variable} over $\<s_1',\dots,s_m'\>$. This is formalized in \see[for:add].
+To simplify a sequence of expressions we need some extra machinery. Simplifying one expression leads to statements $\<s_1,\dots,s_n\>$ and a new expression $e_1$. Simplifying another expression leads to $\<s_1',\dots,s_m'\>$ and $e_2$. We can only pull $e_1$ over the statements $\<s_1',\dots,s_m'\>$ iff the statements do not interfere with the result of expression $e_1$: they have to \emph{commute}. Otherwise we need to introduce a new temporary variable, assign the result of $e_1$ to it and pull \emph{this variable} over $\<s_1',\dots,s_m'\>$. This is formalized in \see[for:add] by defining the combination operator $\oplus$.
 
 \placeformula[for:add]
   \startformula
@@ -593,7 +600,7 @@ To simplify a sequence of expressions we some extra machinery. Lets simplify one
     \stopmultiline
   \stopformula
 
-An expression $e$ commutes with a sequence of statements iff it commutes with each single statement. Commutation with a statement $s$ (notation $e \leftrightarrow s$) is not possible if $e$ is a function call, because of possible side effects. Container expressions commute with a statement if the containing expressions commute with a statement. Values and literals trivially commute.
+An expression $e$ commutes with a sequence of statements iff it commutes with each single statement. Commutation with a statement $s$ (notation $e \leftrightarrow s$) is not possible if $e$ is a function call, because of possible side effects. Container expressions commute with a statement if the containing expressions commute with a statement. Values and literals trivially commute. We will not present the derivation rules here.%FIXME: do it!
 
 Now we can give the simplification rule for a sequence of expressions:
 
@@ -606,19 +613,61 @@ Now we can give the simplification rule for a sequence of expressions:
   \bigoplus_{i=1}^n \big(\<s^{(i)}_1,\dots,s^{(i)}_{m_i}\>, e_i'\big)
   \stopderivationformula
 
+\page
 \section{Implementation}
 
 The implementation in Haskell as almost a straight translation of the math above. Concatenation and addition in the rule \about[rul:stms] and \about[rul:exps] are represented as folds. Fresh variables are supplied by the \type{Supply} monad.\footnote{Yes, another one!}
 
 Source file: \type{Language/SPL/Simplifier.hs}
 
+% -----------------------------------------------------------------------------
+
 \chapter[chp:translator]{Translating}
 
-This chapter describes the translation from a canonical \SPL\ program to instructions supported by the \SSM.
+Translating an intermediate representation to machine code is not an easy task. We do not compile our \SPL\ code to a real machine, but to instructions understood by a simulator, the Simple Stack Machine (\SSM). The supported instructions are in \inlinecite[dijkstra2004implementation].
 
-\emph{This is not yet fully worked out and implemented!}
+\section{Registers}
+
+On the \SSM\ we can use up to eight registers. An overview of all registers and their usage is given in \see[tab:registers]. Registers 6 and 7 are not used, all variables and arguments are kept on the stack.
+
+\placetable[][tab:registers]
+  {Availlable registers and their usage.}
+  \starttabulate[|c|lT|l|p|]
+  \HL
+  \NC Register \NC Symbol \NC Name \NC Description \NC\NR
+  \HL
+  \NC 0 \NC PC \NC Program counter \NC marks current point in program code \NC\NR
+  \NC 1 \NC SP \NC Stack pointer   \NC marks current position on stack \NC\NR
+  \NC 2 \NC MP \NC Mark pointer    \NC marks begin of a stack frame \NC\NR
+  \NC 3 \NC HP \NC Heap pointer \NC marks begin of heap \NC\NR
+  \NC 4 \NC RR \NC Return register \NC used to store the return value of a function \NC\NR
+  \NC 5 \NC GP \NC Global pointer \NC marks begin of global variables on stack \NC\NR
+  \NC 6 \NC R6 \NC – \NC not used \NC\NR
+  \NC 7 \NC R7 \NC – \NC not used \NC\NR
+  \HL
+  \stoptabulate
+
+\section{Stack layout}
+
+\subsection{Functions}
+
+The caller of the function is responsible for placing it's arguments on the stack and removing them afterwards. Arguments are pushed on the stack contrariwise, so from last to first. This way we can find the arguments with a negative offset from the mark pointer.
+
+When entering a function we save the mark pointer on the stack and make a new stack frame. Returning from a function jumps back to the new mark pointer, restores the old mark pointer and returns with \RET\ to the old program counter which the instruction \JSR\ left on the stack.
+
+\subsection{Locals}
+
+Because \SPL\ forces us to declare all our locals, we can easily initialize them on the stack by pushing a zero on the stack. The position on the stack, relative to the mark pointer is known at compile time and stored in a \emph{display}. The display does not only know where it can find locals, but also the arguments. They are at a negative displacement of the mark pointer.
+
+\subsection{Globals}
+
+Global variables are stored at the top of the stack. To keep track of this position, we save the current stack pointer in the register \GP. The actual offset from the \GP\ to the variable is known at compile time and read from the \emph{display}.
 
 \section{Rules}
+
+In this section we show the rules to translate \SPL\ language constructs to \SSM\ instructions.
+Generated instructions are each shown on a new line. Concatenating these lines gives us the desired instructions.
+Labels are off course freshly generated.
 
 \subsubject{Statements}
 
@@ -628,17 +677,14 @@ A statement is translated with the function $\Stm\[\]$. It takes a statement and
 \Stm\[\] : Statement \to \<Instruction\>
 \stopformula
 
-Generated instructions are each shown on a new line. Concatenating these lines gives us the desired instructions.
-Labels are off course freshly generated.
-
 \startformula
 \Stm\[x = e\] = \startcases
   \NC \Exp\[e\] \NC\NR
-  \NC \STL\ loc(x) \NC if $x$ is local \NR
+  \NC \STL\ display(x) \NC if $x$ is local \NR
   \NC\NC\NR
   \NC \Exp\[e\] \NC\NR
   \NC \LDR\ \GP \NC\NR
-  \NC \STA\ loc(c) \NC if $x$ is global \NR
+  \NC \STA\ display(c) \NC if $x$ is global \NR
   \stopcases
 \stopformula
 
@@ -661,25 +707,33 @@ Labels are off course freshly generated.
   \odLabel:    \NC \<\>
 \stopsplit\stopformula
 
-\startformula
-\Stm\[\Return\] = \RET
-\stopformula
+\startformula\startsplit
+\Stm\[\Return\] = \SC
+  \LDRR\ \SP\ \MP \SR
+  \STR\ \MP       \SR
+  \RET
+\stopsplit\stopformula
 
 \startformula\startsplit
 \Stm\[\Return\ e\] = \SC
-  \Exp\[e\] \SR
-  \RET
+  \Exp\[e\]          \SR
+  \STR\ \RR          \SR
+  \Stm\[\Return\]
 \stopsplit\stopformula
 
 \startformula\startsplit
 \Stm\[f(e_1,\dots,e_n)\] = \SC
   \Exp\[e_n\] \SR
-  \vdots \SR
+  \vdots      \SR
   \Exp\[e_1\] \SR
-  \JSR
+  \LDC\ f     \SR
+  \JSR        \SR
+  \AJS -n
 \stopsplit\stopformula
 
 \subsubject{Expressions}
+
+For expressions we use the function $\Exp\[\]$ to translate them to \SSM\ instructions. It follows the same pattern as $\Stm\[\]$.
 
 \startformula
 \Exp\[\] : Expression \to \<Instruction\>
@@ -687,10 +741,10 @@ Labels are off course freshly generated.
 
 \startformula
 \Exp\[x\] = \startcases
-  \NC \LDL\ loc(x) \NC if $x$ is local \NR
+  \NC \LDL\ display(x) \NC if $x$ is local \NR
   \NC\NC\NR
   \NC \LDR\ \GP \NC\NR
-  \NC \LDA\ loc(x)\> \NC if $x$ is global \NR
+  \NC \LDA\ display(x) \NC if $x$ is global \NR
   \stopcases
 \stopformula
 
@@ -699,11 +753,15 @@ Labels are off course freshly generated.
 \stopformula
 
 \startformula
-\Exp\[\True\] = \LDC\ 1
+\Exp\[\True\] = \LDC\ -1
 \stopformula
 
 \startformula
-\Exp\[\False\] = \LDC\ -1
+\Exp\[\False\] = \LDC\ 0
+\stopformula
+
+\startformula
+\Exp\[[]\] = \LDC\ 0
 \stopformula
 
 \startformula\startsplit
@@ -713,8 +771,14 @@ Labels are off course freshly generated.
   \STMH\ 2
 \stopsplit\stopformula
 
+\startformula\startsplit
+\Exp\[f(e_1,\dots,e_n)\] = \SC
+  \Stm\[f(e_1,\dots,e_n)\] \SR
+  \LDR\ \RR
+\stopsplit\stopformula
+
 \startformula
-\Exp\[[]\] = \dots
+\Exp\[e_1\ \Cons\ e_2\] = \Exp\[(e_2,e_1)\]
 \stopformula
 
 \startformula\startsplit
@@ -724,7 +788,7 @@ Labels are off course freshly generated.
   \Op\[\boxdot\] \SR
   \where\ \boxdot \in \{\Add,\Sub,\Mul,\Div,\Mod,
                 \Eq,\Ne,\Lt,\Gt,\Le,\Ge,
-                \And,\Or,\Cons\}
+                \And,\Or\}
 \stopsplit\stopformula
 
 \startformula\startsplit
@@ -734,49 +798,139 @@ Labels are off course freshly generated.
   \where\ \diamond \in \{\Not,\Neg\}
 \stopsplit\stopformula
 
-\startformula\startsplit
-\Exp\[f(e_1,\dots,e_n)\] = \SC
-  \Exp\[e_n\] \SR
-  \vdots \SR
-  \Exp\[e_1\] \SR
-  \JSR
-\stopsplit\stopformula
-
 \subsubject{Operators}
 
+Translation of operators is a trivial mapping from the \SPL\ operator to its corresponding \SSM\ instruction. For example: $\Op\[\Eq\] = \EQ$ and $\Op\[\Add\] = \ADD$. The function has the signature:
+
 \startformula
-\Op\[\] : Operator \to \<Instruction\>
+\Op\[\] : Operator \to \<Instruction\>.
 \stopformula
 
-Translation of operators is a trivial mapping from the \SPL\ operator to its corresponding \SSM\ instruction. For example: $\Op\[\Eq\] = \EQ$ and $\Op\[\Add\] = \ADD$. Only \Cons\ is different\dots
+\subsubject{Definitions}
 
-\subsubject{Functions}
+Translating function definitions is done by the function $\Def\[\]$. It's type signature is similar to the other functions in this section:
 
-\emph{Not yet implemented}
+\startformula
+\Def\[\] : Definition \to \<Instruction\>.
+\stopformula
 
-\section{Examples}
+\startformula\startsplit
+\Def\[\Globals\] = \SC
+  \LDR\ \SP        \SR
+  \STR\ \GP        \SR
+  globals
+\stopsplit\stopformula
 
-\emph{Have to be created and tested}
+\startformula\startsplit
+\Def\[\Main\] = \SC
+  \LDR\ \SP     \SR
+  \STR\ \MP     \SR
+  locals(\Main) \SR
+  \Stm\[statements(\Main)\]     \SR
+  \HALT
+\stopsplit\stopformula
+
+\startformula\startsplit
+\Def\[f\] =       \SC
+  \LDR\ \MP       \SR
+  \LDRR\ \MP\ \SP \SR
+  locals(f)       \SR
+  \Stm\[statements(f)\]
+\stopsplit\stopformula
+
+\section{Example}
+
+Here we can see a simple program which calls a function twice and its translation:
+
+\typeSPLfile{../test/Translator/doublecall.spl}
+
+Translates to
+
+\typefile{../test/Translator/doublecall.ssm}
 
 \section{Implementation}
 
-Once again the implementation is almost a direct translation of the math given in this chapter. Labels are generated fresh by the \type{Supply} monad. Checking for local of global variables is done through asking the \type{Reader} monad. She reads from a \emph{display} which contains this information.
+Once again the implementation is almost a direct translation of the math given in this chapter. Labels are freshly generated by the \type{Supply} monad. Checking for local or global variables is done through asking the \type{Reader} monad. She reads from a \emph{display} which contains this information.
 
-Source files: \type{Language/SPL/Translator.hs}, \type{Language/SPL/Instruction.hs},\crlf \type{Language/SPL/Display.hs}
+Source files: \type{Language/SPL/Translator.hs}, \type{Language/SPL/Data/Instruction.hs}, \type{Language/SPL/Data/Display.hs}
+
+% -----------------------------------------------------------------------------
 
 \chapter[chp:extension]{Extension}
 
-\section{Grammar}
+As an extension to \SPL\ we implemented \emph{pattern matching}. Instead of writing
+
+\typeSPLfile{../test/Patterns/sum_if.spl}
+
+we would like to write
+
+\typeSPLfile{../test/Patterns/sum_match.spl}
+
+\reference[exm:listsum]
+Pattern matching is a common idiom in functional programming languages.
+
+\startemphasize
+This section is short and lacks thorough explanation. Of course more can be clarified at the oral exam.
+\stopemphasize
+
+\page
+\section{Parsing}
 
 \placetable[][tab:grammar_extension]
-  {}
+  {Extensions to the grammar of \SPL\ to allow pattern matching.}
   \startgrammar
   \NC Statement \TQ \dots
-                \OQ \Match\ @(@ Name @)@ (\Case\ @(@ Pattern @)@ Block)\+ \NR
-  \NC Pattern   \TQ \True\ \| \False\ \| Decimal
-                \OQ @[]@  \| Pattern @:@ Pattern
-                \OQ Name \| @(@ Pattern @,@ Pattern @)@ \NR
+                \OQ \Match\ Name (\Case\ @(@ Pattern @)@ Block)\+ \NR
+  \NC Pattern   \TQ \True\ \| \False\ \| Decimal \| @[]@
+                \OQ Name \| @_@
+                \OQ Pattern @:@ Pattern \| @(@ Pattern @,@ Pattern @)@ \NR
   \stopgrammar
+
+\section{Analysing}
+
+\placerule{Match}
+  \startderivationformula
+  \Gamma \vdash n : \sigma \qquad
+  \Gamma \vdash p_1 : \sigma \qquad
+  \dots \qquad
+  \Gamma \vdash p_n : \sigma
+  \NL
+  \Gamma \vdash \Match\ n\ \Case\ p_1\ s_1\ \dots\ \Case\ p_n\ s_1 : \sigma
+  \stopderivationformula
+
+\section{Examples}
+
+\typeSPLfile{../test/Patterns/int_default.spl}
+\typeSPLfile{../test/Patterns/pair_variable.spl}
+\typeSPLfile{../test/Patterns/cons.spl}
+
+\section{Implementation}
+
+Pattern matching is implemented by transforming all cases to \If\ statements and folding them together. So the example on \at{Page}[exm:listsum] becomes.
+
+\startSPL
+Int sum ([Int] list) {
+    Int x = 0;
+    [Int] xs = 0;
+    t _a = 0;
+    x = 0;
+    xs = [];
+    if (isEmpty(list)) {
+        return 0;
+    } else {
+        if ((True && True)) {
+            x = head(list);
+            xs = tail(list);
+            _a = sum(xs);
+            return (x + _a);
+        } else {
+
+        }
+    }
+}
+\stopSPL
+
+% -----------------------------------------------------------------------------
 
 \chapter[chp:remarks]{Remarks}
 
@@ -793,7 +947,8 @@ Apart from time reading books and documentation, \see[tab:time] contains some in
   \NC Printer    \NC \half\ day      \NR
   \NC Analyser   \NC 6 days          \NR
   \NC Simplifier \NC 2\half\ days    \NR
-  \NC Translator \NC 3 days          \NR
+  \NC Translator \NC 7 days          \NR
+  \NC Extension  \NC 3 days          \NR
   \LL
   \stoptabulate
 
@@ -801,28 +956,32 @@ Apart from time reading books and documentation, \see[tab:time] contains some in
   {Lines of code for each part of the compiler}
   \starttabulate[|lT|r|r|r|]
   \FL
-  \RC File                           \NC Blank    \NC Comment       \NC Code \NR
+  \NC File                 \NC  Blank  \NC  Comment  \NC  Code  \NR
   \ML
-  \NC Lexer.hs                       \NC    13    \NC       5       \NC   53 \NR
-  \NC Parser.hs                      \NC    26    \NC      19       \NC  105 \NR
-  \NC Printer.hs                     \NC     8    \NC       9       \NC   25 \NR
-  \NC Analyser.hs                    \NC    36    \NC      70       \NC   96 \NR
-  \NC Simplifier.hs                  \NC    28    \NC      12       \NC   81 \NR
-  \NC Translator.hs                  \NC    18    \NC       8       \NC   90 \NR
-  \NC Data/Position.hs               \NC     6    \NC       0       \NC   12 \NR
-  \NC Data/Program.hs                \NC    32    \NC       3       \NC  142 \NR
-  \NC Data/Error.hs                  \NC    13    \NC       3       \NC   62 \NR
-  \NC Data/Environment.hs            \NC    18    \NC       0       \NC   59 \NR
-  \NC Data/Display.hs                \NC    10    \NC       1       \NC   19 \NR
-  \NC Data/Instruction.hs            \NC    15    \NC       2       \NC   57 \NR
+  \NC Lexer.hs             \NC     13  \NC        5  \NC    53  \NR
+  \NC Parser.hs            \NC     28  \NC       33  \NC   119  \NR
+  \NC Printer.hs           \NC      9  \NC        9  \NC    32  \NR
+  \NC Analyser.hs          \NC     41  \NC       79  \NC   110  \NR
+  \NC Simplifier.hs        \NC     31  \NC       28  \NC   121  \NR
+  \NC Translator.hs        \NC     24  \NC       11  \NC   152  \NR
+  \NC Helpers.hs           \NC     17  \NC       15  \NC    16  \NR
+  \NC Data/Position.hs     \NC      6  \NC        0  \NC    12  \NR
+  \NC Data/Program.hs      \NC     33  \NC        4  \NC   178  \NR
+  \NC Data/Error.hs        \NC     13  \NC        0  \NC    69  \NR
+  \NC Data/Environment.hs  \NC     18  \NC        2  \NC    61  \NR
+  \NC Data/Instruction.hs  \NC     23  \NC        3  \NC    71  \NR
+  \NC Data/Display.hs      \NC     10  \NC        1  \NC    26  \NR
   \ML
-  \RC Total                          \NC   223    \NC     132       \NC  801 \NR
+  \NC Total                \NC    266  \NC      190  \NC  1020  \NR
   \LL
   \stoptabulate
 
 \stopbodymatter
 
 \startbackmatter
+
+% -----------------------------------------------------------------------------
+
 \chapter{References}
 
 \placepublications[criterium=all]

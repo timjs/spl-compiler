@@ -4,9 +4,6 @@
 
 \setupbodyfont[lucida,10pt]
 
-\setupindenting[no]
-\setupwhitespace[medium]
-
 \setuphead[chapter]
   [page=yes]
 
@@ -54,6 +51,7 @@
 \define\SSM  {{\sc ssm}}
 \define\Stm  {{\math{\mathcal{S}}}}
 \define\Exp  {{\math{\mathcal{E}}}}
+\define\Def  {{\math{\mathcal{D}}}}
 \define\Op   {{\math{\mathcal{O}}}}
 \define\Stms {{\math{\mathcal{S}^+}}}
 \define\Exps {{\math{\mathcal{E}^+}}}
@@ -98,6 +96,7 @@
 \definekeyword{Fst}{fst}
 \definekeyword{Snd}{snd}
 \definekeyword{Main}{main}
+\definekeyword{Globals}{_globals}
 
 \define[2]\defineoperator
   {\setvalue{#1}{\text{\tt\tf #2}}}

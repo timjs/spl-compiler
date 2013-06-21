@@ -113,7 +113,7 @@ instance Translatable Statement where
     Execute Print a -> do a' <- translate a
                           return $ a'                                ><
                                    TRAP 0 ## ("Print " ++ dullify a)
-    
+
     -- Function calls place their own arguments on the stack and remove them afterwards
     Execute n as    -> do as' <- translate $ reverse as
                           return $ as'                                                       ><
@@ -152,7 +152,7 @@ instance Translatable Expression where
                                   LDMH 0 2 ## "Push tuple/list from heap"   ><
                                   SWP      ## "Swap fst/tail with snd/head" ><
                                   AJS (-1) ## "Remove fst/tail"
-    -- and delegate other callst to Execute
+    -- and delegate other calls to Execute
     Call n as      -> do ex <- translate (Execute n as)
                          return $ ex                            ><
                                   LDR RR ## "Load return value"
