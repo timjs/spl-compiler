@@ -31,7 +31,33 @@
   \end{columns}
 }
 
+\lstnewenvironment{code}
+  {\lstset{language=c,
+           morekeywords={Int,Bool,Void,match,print,isEmpty,head,tail,fst,snd}}}
+  {}
+
 \newcommand{\SPL}
   {SPL}
+
+\newcommand{\Keyword}[1]
+  {\text{\ttfamily\bfseries #1}}
+\newcommand{\Label}[1]
+  {\text{\sffamily #1}}
+
+\newcommand    \Stm      {{\ensuremath{\mathcal{S}}}}
+\newcommand    \Exp      {{\ensuremath{\mathcal{E}}}}
+\newcommand    \Op       {{\ensuremath{\mathcal{O}}}}
+\newcommand    \Stms     {{\ensuremath{\mathcal{S}^+}}}
+\newcommand    \Exps     {{\ensuremath{\mathcal{E}^+}}}
+\newcommand    \If       {\text{\ttfamily\bfseries if}}
+
+\let\lbracket[
+\let\rbracket]
+\newcommand    \lBracket {\ensuremath{\lbracket\!\lbracket}}
+\newcommand    \rBracket {\ensuremath{\rbracket\!\rbracket}}
+\newcommand    \<        {\ensuremath{\langle}}
+\renewcommand  \>        {\ensuremath{\rangle}}
+\renewcommand  \[        {\ensuremath{\lBracket}}
+\renewcommand  \]        {\ensuremath{\rBracket}}
 
 % vim: ft=latex

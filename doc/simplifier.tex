@@ -5,27 +5,8 @@
            keywords={do,data,type,if,then,else,case,of,return,
                      supplies,
                      Int,Bool,Maybe,Seq},
-           otherkeywords={=,::,->,<-,\$,=~,<\&>}}} 
+           otherkeywords={=,::,->,<-,\$,=~,<\&>}}}
   {}
-
-\newcommand{\Label}[1]
-  {\text{\sffamily #1}}
-
-\newcommand    \Stm      {{\ensuremath{\mathcal{S}}}}
-\newcommand    \Exp      {{\ensuremath{\mathcal{E}}}}
-\newcommand    \Op       {{\ensuremath{\mathcal{O}}}}
-\newcommand    \Stms     {{\ensuremath{\mathcal{S}^+}}}
-\newcommand    \Exps     {{\ensuremath{\mathcal{E}^+}}}
-\newcommand    \If       {\text{\ttfamily\bfseries if}}
-
-\let\lbracket[
-\let\rbracket]
-\newcommand    \lBracket {\ensuremath{\lbracket\!\lbracket}}
-\newcommand    \rBracket {\ensuremath{\rbracket\!\rbracket}}
-\newcommand    \<        {\ensuremath{\langle}}
-\renewcommand  \>        {\ensuremath{\rangle}}
-\renewcommand  \[        {\ensuremath{\lBracket}}
-\renewcommand  \]        {\ensuremath{\rBracket}}
 
 \begin{document}
 
@@ -80,7 +61,7 @@
 \subsection*{}
 
 \begin{frame}[fragile]{Intermediate Representation}
-  
+
   No special intermediate representation,\\
   just \SPL\ itself!
 
@@ -115,7 +96,7 @@
 \begin{frame}[fragile]{Example: \If}
 
   \begin{gather*}
-    e \leadsto_\Exp (\< s_1, \dots, s_n \>, e') \qquad 
+    e \leadsto_\Exp (\< s_1, \dots, s_n \>, e') \qquad
     s_t \leadsto_\Stms s_t' \qquad
     s_f \leadsto_\Stms s_f' \\
     \midrule
@@ -146,8 +127,8 @@
 
 \begin{frame}[fragile]{Supplies}
 
-  We need a monad! 
-  
+  We need a monad!
+
   \begin{itemize}
     \item Infinite stream of temporaries and labels
   \end{itemize}
@@ -169,7 +150,7 @@
       main = print $ evalSupply user vars   -- prints (1,2)
     \end{HASKELL}
   \end{block}
-  
+
 
 \end{frame}
 
@@ -252,7 +233,7 @@
 
 
 \begin{frame}[fragile]{Rules II}
-  
+
   \structure{Fresh variables}
 
   Just use\ldots\ a Monad!
@@ -265,14 +246,14 @@
     \begin{HASKELL}
       simplify (Call n es) =
               do (ss,es') <- simplify es
-                        t <- supply 
+                        t <- supply
                  return   $  ( ss |> Assign t (Call n es')
                              , Value t)
     \end{HASKELL}
   \end{block}
 
 \end{frame}
-    
+
 
 
 \end{document}

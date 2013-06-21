@@ -1,0 +1,15 @@
+\startcomponent patterncheck
+\environment    reportlayout
+
+\startTEXpage
+  \startderivationformula
+  \Gamma \vdash n : \sigma \qquad
+  \Gamma \vdash p_1 : \sigma \qquad
+  \dots \qquad
+  \Gamma \vdash p_n : \sigma
+  \NL
+  \Gamma \vdash \Match\ n\ \Case\ p_1\ s_1\ \dots\ \Case\ p_n\ s_1 : \sigma
+  \stopderivationformula
+\stopTEXpage
+
+\stopcomponent

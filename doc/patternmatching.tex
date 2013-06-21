@@ -1,0 +1,229 @@
+\input beamerlayout
+
+\lstnewenvironment{HASKELL}
+  {\lstset{language=haskell,
+           keywords={do,data,type,if,then,else,case,of,return,
+                     supplies,
+                     Int,Bool,Maybe,Seq},
+           otherkeywords={=,::,->,<-,\$,=~,<\&>}}}
+  {}
+
+\begin{document}
+
+\subtitle {Compiler Construction}
+\title    {Pattern Matching in \SPL}
+\author   [Tim Steenvoorden]
+          {Tim Steenvoorden\\
+           \medskip
+           {\small \url{tim.steenvoorden@gmail.com}}}%@
+\institute{Radboud University Nijmegen}
+\date     {21 June 2013}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%\begin{frame}{Outline}
+  %\tableofcontents
+%\end{frame}
+
+\section{Prologue}
+\subsection*{}
+
+\begin{frame}[fragile]{Goal}
+
+  \begin{twocolumns}
+    Instead of:
+    \begin{code}
+      Int sum ([Int] list) {
+
+        if (isEmpty(list))
+          return 0;
+        else
+          return head(list) +
+                 sum(tail(list));
+      }
+    \end{code}
+    \pause
+    \nextcolumn
+    We'd like to write:
+    \begin{code}
+      Int sum ([Int] list) {
+        match list
+        case ([])
+          return 0;
+        case (x:xs)
+          return x + sum(xs);
+
+      }
+    \end{code}
+  \end{twocolumns}
+
+  And maybe other fancy stuff\dots
+
+\end{frame}
+
+\begin{frame}{Prerequisites}
+
+  \alt<-2>
+    {Lexing/Parsing $\leadsto$ Analysing $\leadsto$ Simplifying $\leadsto$ Translating}
+    {Lexing/\structure{Parsing} $\leadsto$ \structure{Analysing} $\leadsto$ \structure{Simplifying} $\leadsto$ Translating}
+
+  \pause
+  \bigskip
+
+  \begin{enumerate}
+    \item Extend our grammar
+    \item Make new type checking rules
+    \item Simplify it
+  \end{enumerate}
+
+  \pause
+  \bigskip
+
+  No modifications to translator!
+
+\end{frame}
+
+\section{Parsing}
+\subsection*{}
+
+\begin{frame}{Parsing}
+
+  \begin{figure}
+    \includegraphics{patterngrammar}
+  \end{figure}
+
+  \begin{itemize}
+    \item \Keyword{match} is a \emph{statement}, not an \emph{expression}
+    \item Takes a \emph{Name}
+    \item Matches it against one or more \emph{Pattern}s
+    \item Patterns are \emph{constants}, \emph{names}, \emph{anything}\\
+          or a \emph{combination} of patterns
+  \end{itemize}
+
+\end{frame}
+
+\section{Analysing}
+\subsection*{}
+
+\begin{frame}{Analysing}
+
+  \begin{figure}
+    \includegraphics{patterncheck}
+  \end{figure}
+
+  \begin{itemize}
+    \item Types of name and patterns have to match
+    \item No type inference, so can't match expressions
+  \end{itemize}
+\end{frame}
+
+\section{Simplifying}
+\subsection*{}
+
+\begin{frame}{Simplifying}
+
+  Simplify to \Keyword{if} statements
+
+  but...
+
+  \pause
+
+  It's more complicated than a C-like \Keyword{switch}!
+
+  \begin{description}
+    \item[Constants]  \texttt{0, 1, True, False, []} \\
+                      Test for equality
+    \item[Names]      \texttt{x, xs} \\
+                      Add assign statement
+    \item[Anything]   \texttt{\_} \\
+                      Match anything
+    \item[Cons/Pair]  \texttt{1:2:[], (a,b)} \\
+                      Use \texttt{isEmpty}, \texttt{head}, \texttt{tail}, \texttt{fst} and \texttt{snd}
+  \end{description}
+
+\end{frame}
+
+\begin{frame}{Optimisations}
+
+  \begin{itemize}
+    \item Built in functions \texttt{isEmpty}, \texttt{head}, \texttt{tail}, \texttt{fst}, \texttt{snd} are \structure{inlined}, so they are not very expensive
+    \item No fold of unnecessary \texttt{True}'s in conditions (yet)
+  \end{itemize}
+
+\end{frame}
+
+\section{Epilogue}
+\subsection*{}
+
+\begin{frame}{Code}
+
+  \begin{twocolumns}
+    \begin{table}
+      \footnotesize
+      \begin{tabular}{lr}
+        \hline
+        File                & Lines \\
+        \hline
+        Lexer.hs            &   53  \\
+        Parser.hs           &  119  \\
+        Printer.hs          &   32  \\
+        Analyser.hs         &  110  \\
+        Simplifier.hs       &  121  \\
+        Translator.hs       &  152  \\
+        Helpers.hs          &   16  \\
+        Data/Program.hs     &  178  \\
+        Data/Position.hs    &   12  \\
+        Data/Environment.hs &   61  \\
+        Data/Error.hs       &   69  \\
+        Data/Instruction.hs &   71  \\
+        Data/Display.hs     &   26  \\
+        \hline
+        Total               & 1020  \\
+        \end{tabular}
+    \end{table}
+    \nextcolumn
+    Just 80 lines to implement pattern matching!
+  \end{twocolumns}
+
+\end{frame}
+
+\begin{frame}{Demo}
+  Code on GitHub: \url{https://github.com/timsteenvoorden/spl-compiler}
+
+  \bigskip
+
+  See how it works!
+\end{frame}
+
+\appendix
+
+\begin{frame}[fragile]{Goal}
+
+  And maybe other fancy stuff\dots
+
+    \begin{code}
+      Int matcher ((Int, Bool) pair) {
+        match pair
+        case ((0,True))
+          return 0;
+        case ((1,False))
+          return -1;
+        case ((x,True))
+          return x;
+        case ((x,False))
+          return -x;
+      }
+
+      Void main () {
+        print(matcher(8,False));    // Should print -8
+      }
+    \end{code}
+
+\end{frame}
+
+
+\end{document}
+
+% vim: ft=latex spell spl=en

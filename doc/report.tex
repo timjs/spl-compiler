@@ -169,7 +169,7 @@ We start with the rules for the four basic types:
   \startderivationformula
   b \in \booleans
   \NL
-  \gamma \vdash b:\BOOL
+  \Gamma \vdash b:\BOOL
   \stopderivationformula
 
 \placerule{integer}
@@ -405,7 +405,7 @@ Source files: @Language/SPL/Error.hs@, @Language/SPL/Analyser.hs@.
 
 We do not use a special intermediate representation. The \SPL\ language has a clear separation between statements and expressions and is simple enough to serve this purpose. Nevertheless, we need to simplify our original program a bit to make generation of instructions easier.
 
-First of all we transform all declarations to ordinary assignments, so that a canonical \SPL\ function starts with the initialization of its local variables. All global variables have to be initialized too. Therefore we add the corresponding assignments to the \Main\ function. Second, we have to make sure expressions do not have side effects. The only way side effects can occur is by a function call inside an expressions. Thus we need to extract function calls, assign the result to a temporary variable and refer to this variable in the original expression. 
+First of all we transform all declarations to ordinary assignments, so that a canonical \SPL\ function starts with the initialization of its local variables. All global variables have to be initialized too. Therefore we add the corresponding assignments to the \Main\ function. Second, we have to make sure expressions do not have side effects. The only way side effects can occur is by a function call inside an expressions. Thus we need to extract function calls, assign the result to a temporary variable and refer to this variable in the original expression.
 
 \section{Rules}
 
@@ -432,7 +432,7 @@ The simplification of a statement can return multiple statements. Thus $\leadsto
 
 \placerule{If}
   \startderivationformula
-  e \leadsto_\Exp (\< s_1, \dots, s_n \>, e') \qquad 
+  e \leadsto_\Exp (\< s_1, \dots, s_n \>, e') \qquad
   s_t \leadsto_\Stms s_t' \qquad
   s_f \leadsto_\Stms s_f'
   \NL
@@ -442,7 +442,7 @@ The simplification of a statement can return multiple statements. Thus $\leadsto
 
 \placerule{While}
   \startderivationformula
-  e \leadsto_\Exp (\< s_1, \dots, s_n \>, e') \qquad 
+  e \leadsto_\Exp (\< s_1, \dots, s_n \>, e') \qquad
   s \leadsto_\Stms s'
   \NL
   \While\ e\ s \leadsto_\Stm \< s_1, \dots, s_2 \>
@@ -587,7 +587,7 @@ To simplify a sequence of expressions we some extra machinery. Lets simplify one
         \NC \big(\<s_1,\dots,s_n\> \bowtie x_t = e \triangleleft \<s_1',\dots,s_m'\> \NC\NR
         \NC ,x_t \triangleleft \<e_1',\dots,e_k'\>\big)
         \NC otherwise
-        \NR 
+        \NR
         \stopcases \SR
       \where\ x_t \text{ is a fresh variable}
     \stopmultiline
@@ -772,7 +772,7 @@ Source files: \type{Language/SPL/Translator.hs}, \type{Language/SPL/Instruction.
   {}
   \startgrammar
   \NC Statement \TQ \dots
-                \OQ \Match\ @(@ Name @)@ (\Case\ @(@ Expression @)@ Block)\+ \NR
+                \OQ \Match\ @(@ Name @)@ (\Case\ @(@ Pattern @)@ Block)\+ \NR
   \NC Pattern   \TQ \True\ \| \False\ \| Decimal
                 \OQ @[]@  \| Pattern @:@ Pattern
                 \OQ Name \| @(@ Pattern @,@ Pattern @)@ \NR
@@ -819,7 +819,7 @@ Apart from time reading books and documentation, \see[tab:time] contains some in
   \RC Total                          \NC   223    \NC     132       \NC  801 \NR
   \LL
   \stoptabulate
-    
+
 \stopbodymatter
 
 \startbackmatter

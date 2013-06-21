@@ -1,0 +1,14 @@
+\startcomponent patterngrammar
+\environment    reportlayout
+
+\startTEXpage
+	\startgrammar
+	\NC Statement \TQ \dots
+	              \OQ \Match\ Name (\Case\ @(@ Pattern @)@ Block)\+ \NR
+	\NC Pattern   \TQ \True\ \| \False\ \| Decimal \| @[]@
+	              \OQ Name \| @_@
+	              \OQ Pattern @:@ Pattern \| @(@ Pattern @,@ Pattern @)@ \NR
+	\stopgrammar
+\stopTEXpage
+
+\stopcomponent
