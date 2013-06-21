@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 module Language.SPL.Parser where
 
 import Control.Applicative
@@ -104,7 +103,7 @@ pattern  =   AnyPattern        <$  symbol "_"
 -}
 pattern, patternCons :: Parser Pattern
 pattern = patternCons `chainr1` patternOper
-patternCons =   AnyPattern          <$  symbol "_"
+patternCons =   AnyPattern        <$  symbol "_"
             <|> ListPattern       <$  symbol "[]"
             <|> BoolPattern True  <$  reserved "True"
             <|> BoolPattern False <$  reserved "False"

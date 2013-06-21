@@ -33,6 +33,8 @@ builtins = return $ Map.fromList types
                   , (Tail,    Function (LIST (POLY "a")) 1 [LIST (POLY "a")])
                   , (Fst,     Function (PAIR (POLY "a") (POLY "b")) 1 [POLY "a"])
                   , (Snd,     Function (PAIR (POLY "a") (POLY "b")) 1 [POLY "b"])
+                  , (Fst,     Function (POLY "a") 1 [PAIR (POLY "a") (POLY "b")])
+                  , (Snd,     Function (POLY "b") 1 [PAIR (POLY "a") (POLY "b")])
                   , (Main,    Function VOID 0 [])
                   ]
 

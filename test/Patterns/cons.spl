@@ -1,7 +1,7 @@
 Int matcher ([Int] list)
 {
 	[Int] xs = [];
-	
+
     match list
     case ([])
         return 0;
@@ -16,12 +16,12 @@ Int matcher ([Int] list)
 }
 
 Void main () {
-	print(matcher([]));
-	print(matcher(1:[]));
-	print(matcher(1:2:[]));
-	print(matcher(1:2:3:[]));
-	print(matcher(1:2:3:4:[]));
-	print(matcher(4:3:2:1:[]));
+	print(matcher([]));         // => 0
+	print(matcher(1:[]));       // => 1
+	print(matcher(1:2:[]));     // => 2
+	print(matcher(1:2:3:[]));   // => 4
+	print(matcher(1:2:3:4:[])); // => 4
+	print(matcher(4:3:2:1:[])); // => 8
 }
 
 // vim: ft=c syn=spl

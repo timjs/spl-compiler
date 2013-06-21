@@ -131,7 +131,9 @@ instance Simplifiable Pattern (Expression -> (Expression,Statements)) where
       ConsPattern l r   -> do l' <- simplify l -- :: Expression -> (Expression,Statements)
                               r' <- simplify r -- :: Expression -> (Expression,Statements)
                               return $ \e -> l' (Call Head [e]) `combine` r' (Call Tail [e])
-      PairPattern l r   -> error "pair pattern matching not yet implemented"
+      PairPattern l r   -> do l' <- simplify l
+                              r' <- simplify r
+                              return $ \e -> l' (Call Fst [e]) `combine` r' (Call Snd [e])
       where
         combine :: (Expression,Statements) -> (Expression,Statements) -> (Expression,Statements)
         combine (e,s) (e',s') = (Infix And e e', s ++ s')

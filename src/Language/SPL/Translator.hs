@@ -139,6 +139,10 @@ instance Translatable Expression where
     -- We inline basic functions
     Call Head a    -> translate $ Call Snd a -- Lists are stored in the as tuples of (tail, head),
     Call Tail a    -> translate $ Call Fst a -- so we can build them up more quickly.
+    Call IsEmpty a -> do a' <- translate a
+                         return $ a'    ## ("Addres of '" ++ dullify a ++ "'")         ><
+                                  LDC 0 ## "Push 0"                                    ><
+                                  EQ    ## ("Check if '" ++ dullify a ++ "' is empty")
     Call Fst  a    -> do a' <- translate a
                          return $ a'                                      ><
                                   LDMH 0 2 ## "Push tuple/list from heap" ><

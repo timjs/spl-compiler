@@ -1,6 +1,6 @@
 // Vector operations
 
-Int create (Int n) {
+(Int, (Int, Int)) create (Int n) {
     return (n, (n, n));
 }
 
@@ -14,6 +14,14 @@ Int create (Int n) {
     return (fst(v)*f,(
             fst(snd(v))*f,
             snd(snd(v))*f));
+}
+
+Void main () {
+	(Int,(Int,Int)) vector1 = create(1);
+	(Int,(Int,Int)) vector2 = create(2);
+
+	print(fst(add(vector1, vector2)));// => 3
+	print(fst(scale(vector1, 4)));    // => 4
 }
 
 // vim: ft=c syn=spl

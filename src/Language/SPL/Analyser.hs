@@ -199,7 +199,7 @@ instance Matchable Type where
   PAIR t s =~ PAIR t' s' = t =~ t' <&> s =~ s'
   t        =~ t'
     | t == t'            = return True
-    | otherwise          = report p (TypeMismatch t (Name "UNUSED") t)
+    | otherwise          = report p (TypeMismatch t (Name "SOMETHING") t')
 
 
 

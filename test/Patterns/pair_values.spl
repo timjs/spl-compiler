@@ -10,13 +10,13 @@ Int matcher (Int i ,Bool b)
     case ((1,True))
     	return 1;
     case ((1,False))
-    	return 0;
+    	return 2;
 }
 
 Void main () {
-	print(matcher(0,True));
-	print(matcher(1,False));
-	print(matcher(2,False));
+	print(matcher(0,True)); // => 0
+	print(matcher(1,False));// => 2
+	print(matcher(2,False));// => ?
 }
 
 // vim: ft=c syn=spl
